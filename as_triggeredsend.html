@@ -1,0 +1,34 @@
+<!-- 
+  Create new DE from Template and select 'TriggeredSendDataExtension'
+  -- SubscriberKey, EmailAddress are required fields
+
+  Include below AMPscript on a cloudpage with form/form handler
+ -->
+
+
+%%[
+var @ts, @tsDef, @ts_subkey, @ts_sub, @ts_statusCode, @errorCode
+
+
+   SET @ts = CreateObject("TriggeredSend")
+   SET @tsDef = CreateObject("TriggeredSendDefinition")
+   SET @ts_subkey = @EmailAddress 
+
+   SetObjectProperty(@tsDef, "CustomerKey", "TSDE External Key")
+   SetObjectProperty(@ts, "TriggeredSendDefinition", @tsDef)
+
+   SET @ts_sub = CreateObject("Subscriber")
+   SetObjectProperty(@ts_sub, "EmailAddress", @EmailAddress)  
+
+   IF NOT EMPTY(@ts_subkey) THEN
+       SetObjectProperty(@ts_sub, "SubscriberKey", @ts_subkey)
+   ELSE
+       SetObjectProperty(@ts_sub, "SubscriberKey", @EmailAddress)
+   ENDIF 
+   AddObjectArrayItem(@ts, "Subscribers", @ts_sub)
+   SET @ts_statusCode = InvokeCreate(@ts, @ts_statusMsg, @errorCode)
+
+   IF @ts_statusCode != "OK" THEN
+       RaiseError(@ts_statusMsg, 0, @ts_statusCode, @errorCode)
+   ENDIF
+]%%
