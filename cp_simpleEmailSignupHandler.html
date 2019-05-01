@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Hickory Farms Business Gifting</title>
+
+  <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> 
+     <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+
+      <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+      <script src="https://unpkg.com/gijgo@1.9.11/js/gijgo.min.js" type="text/javascript"></script>
+      <link href="https://unpkg.com/gijgo@1.9.11/css/gijgo.min.css" rel="stylesheet" type="text/css" />
+
+  <style>
+      body {
+        overflow-x: hidden;
+      }
+
+    .bgimg {
+      background-image: url("http://image.e.hickoryfarms.com/lib/fe5a15707c610c7e7012/m/6/d32da96c-06d2-4184-8cff-4f8782b656fc.jpg");
+      width:100vw;
+      background-position: center;
+      background-repeat:no-repeat;
+      background-size: cover;
+      overflow-x:hidden;
+      
+    }
+
+    .car-height {
+      height:75vh!important;
+    }
+
+    .navbar-dark .navbar-nav .nav-link {
+      color:#333333!important;
+
+    }
+
+    .nav-style {
+        font-size:12px;
+        line-height:8px!important;
+        font-family:'Montserrat', sans-serif;
+        color:#333333;
+        text-align: center;
+        font-weight:500;
+    }
+
+    .nav-boarder {
+      border-top:1px solid #e2e2e2;
+      border-bottom:1px solid #e2e2e2;
+    }
+    
+      .form-text {
+        font-size:18px;
+        color:#000000;
+      font-family:'Montserrat', sans-serif;
+
+      }
+
+      .content {
+        font-size:18px;
+        font-family:'Montserrat', sans-serif;
+        font-weight:600;
+
+      }
+
+      .item-header {
+        font-size:18px;
+        font-weight:bold;
+        font-family:'Montserrat', sans-serif;
+        color:#444444!important;
+        text-align: center;
+        line-height:38px;
+        display: block;
+      }
+
+      .ty-header{
+        line-height:40px;
+      }
+
+      .item-name {
+        font-size:14px;
+        font-family:'Montserrat', sans-serif;
+        color:#000000;
+        text-align: center;
+        line-height:16px;
+        display: block;
+
+      }
+
+ .disclaimer {
+        font-size:10px;
+        font-family:'Montserrat', sans-serif;
+        color:#000000;
+      }
+
+      .limit {
+        word-wrap:break-word;
+      }
+
+      .btn-red {
+        background-color:#cc0000!important;
+        color:#ffffff!important;
+        font-weight:600!important;
+        padding:10px 20px!important;
+      }
+
+      .btn-red:hover {
+        border:1px solid #ffffff;
+      }
+
+ .ui-datepicker-year {
+  display: none;
+}
+
+.btn-outline-secondary {
+  background-color:#ffffff!important;
+  border-left:1px solid #777777!important;
+}
+
+.gj-icon {color:#777777!important;}
+
+.h3-lh {line-height:40px;}
+
+
+@media only screen and (max-width: 576px) { 
+  .remove-border {
+    border-right:none !important;
+    border:none !important;
+    margin:auto !important;
+  }
+
+  .content {
+    font-size:16px!important;
+  }
+
+  .nav-link {
+    text-align: center!important;
+    display:block!important;
+    font-size:18px!important;
+    line-height:22px!important;
+}
+
+.logo {
+  width:70%!important;
+}
+
+.logo2 {
+  width:50%!important;
+}
+
+.item-header {
+        font-size:16px;
+        font-weight:bold;
+        font-family:'Montserrat', sans-serif;
+        color:#444444!important;
+        text-align: center;
+        line-height:20px;
+        display: block;
+      }
+
+.bgimg {
+      background-image: url("http://image.e.hickoryfarms.com/lib/fe5a15707c610c7e7012/m/6/827764c9-0a63-4353-9ea1-1db5bf95f640.jpg");
+          background-position:  center;
+      background-repeat:no-repeat;
+      background-size: cover;
+      overflow:auto;
+    }
+
+
+.ham-nav-margin {
+  margin-top:-35px;
+ }
+
+
+}
+
+
+</style>
+ </head>
+ <body class="m-0 p-0">
+
+
+   %%[ 
+  /*Get Subscriber Details*/
+       set @EmailAddress = RequestParameter('EmailAddress')
+       set @doi_confirm_date = NOW()
+
+if NOT Empty(@EmailAddress) then
+
+   set @eventSub = RowCount(LookupRows('B2Bevent_import_staging','EmailAddress',@EmailAddress))
+   set @repSub = RowCount(LookupRows('B2B_RepLandingPage_Staging','EmailAddress',@EmailAddress))
+
+        if @repSub >= 1 then
+          Set @AcquisitionDate = Lookup('B2B_RepLandingPage_Staging','AcquisitionDate','EmailAddress',@EmailAddress)
+          Set @acquisition_source = Lookup('B2B_RepLandingPage_Staging','acquisition_source','EmailAddress',@EmailAddress)
+          Set @FirstName = Lookup('B2B_RepLandingPage_Staging','First Name','EmailAddress',@EmailAddress)
+          Set @LastName = Lookup('B2B_RepLandingPage_Staging','Last Name','EmailAddress',@EmailAddress)
+          Set @Company = Lookup('B2B_RepLandingPage_Staging','Company','EmailAddress',@EmailAddress)
+          Set @HF_SubscribeDate = NOW()
+          Set @vendor_type = Lookup('B2B_RepLandingPage_Staging','vendor_type','EmailAddress',@EmailAddress)
+          Set @city = Lookup('B2B_RepLandingPage_Staging','city','EmailAddress',@EmailAddress)
+          Set @state = Lookup('B2B_RepLandingPage_Staging','state','EmailAddress',@EmailAddress)
+          Set @zip = Lookup('B2B_RepLandingPage_Staging','zip','EmailAddress',@EmailAddress)
+          Set @event_name = Lookup('B2B_RepLandingPage_Staging','event_name','EmailAddress',@EmailAddress)
+          Set @inquire_method = Lookup('B2B_RepLandingPage_Staging','inquire_method','EmailAddress',@EmailAddress)
+          Set @rep_name = Lookup('B2B_RepLandingPage_Staging','rep_name','EmailAddress',@EmailAddress)
+          Set @address_1 = Lookup('B2B_RepLandingPage_Staging','address_1','EmailAddress',@EmailAddress)
+          Set @address_2 = Lookup('B2B_RepLandingPage_Staging','address_2','EmailAddress',@EmailAddress)
+          Set @title = Lookup('B2B_RepLandingPage_Staging','title','EmailAddress',@EmailAddress)
+          Set @phone_number = Lookup('B2B_RepLandingPage_Staging','phone_number','EmailAddress',@EmailAddress)
+
+        elseif @eventSub >= 1 then
+          Set @AcquisitionDate = Lookup('B2Bevent_import_staging','AcquisitionDate','EmailAddress',@EmailAddress)
+          Set @acquisition_source = Lookup('B2Bevent_import_staging','acquisition_source','EmailAddress',@EmailAddress)
+          Set @FirstName = Lookup('B2Bevent_import_staging','First Name','EmailAddress',@EmailAddress)
+          Set @LastName = Lookup('B2Bevent_import_staging','Last Name','EmailAddress',@EmailAddress)
+          Set @Company = Lookup('B2Bevent_import_staging','Company','EmailAddress',@EmailAddress)
+          Set @HF_SubscribeDate = NOW()
+          Set @vendor_type = Lookup('B2Bevent_import_staging','vendor_type','EmailAddress',@EmailAddress)
+          Set @city = Lookup('B2Bevent_import_staging','city','EmailAddress',@EmailAddress)
+          Set @state = Lookup('B2Bevent_import_staging','state','EmailAddress',@EmailAddress)
+          Set @zip = Lookup('B2Bevent_import_staging','zip','EmailAddress',@EmailAddress)
+          Set @event_name = Lookup('B2Bevent_import_staging','event_name','EmailAddress',@EmailAddress)
+          Set @inquire_method = Lookup('B2Bevent_import_staging','inquire_method','EmailAddress',@EmailAddress)
+          Set @rep_name = Lookup('B2Bevent_import_staging','rep_name','EmailAddress',@EmailAddress)
+          Set @address_1 = Lookup('B2Bevent_import_staging','address_1','EmailAddress',@EmailAddress)
+          Set @address_2 = Lookup('B2Bevent_import_staging','address_2','EmailAddress',@EmailAddress)
+          Set @title = Lookup('B2Bevent_import_staging','title','EmailAddress',@EmailAddress)
+        endif
+       
+       if @exists == 0 then
+         UpsertData(
+         'Hickory_Farms_Subscribers_B2B_Staging',1,
+         'EmailAddress',@EmailAddress,
+         'acquisition_source',@acquisition_source,
+         'AcquisitionDate',@AcquisitionDate,
+         'First Name',@FirstName,
+         'Last Name',@LastName,
+         'Company',@Company,
+         'vendor_type',@vendor_type,
+         'city',@city,
+         'state',@state,
+         'zip',@zip,
+         'event_name',@event_name,
+         'inquire_method',@inquire_method,
+         'rep_name',@rep_name,
+         'address_1',@address_1,
+         'address_2',@address_2,
+         'title',@title,
+         'phone_number',@phone_number,
+         'HF_SubscribeDate', @HF_SubscribeDate,
+         'doi_confirm_date', @doi_confirm_date
+         )
+       else
+       endif
+ ENDIF
+
+
+
+  ]%%
+
+
+<!--main logo
+  http://image.e.hickoryfarms.com/lib/fe5a15707c610c7e7012/m/6/5b4f202f-28c9-404a-84e6-13eef9980c3f.png
+-->
+<!-- mobile logo
+  https://www.hickoryfarms.com/on/demandware.static/-/Sites-HickoryFarms-Library/default/dw77bc7c81/images/logos/logo-mobile.svg
+-->
+<!-- mobile toggle
+  <button class="navbar-toggler navbar-light" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+-->
+
+    <div class="container-fluid">
+      <div class="row d-none d-md-flex justify-content-center">
+        <div class="col-md-3 my-4">
+          <img src="http://image.e.hickoryfarms.com/lib/fe5a15707c610c7e7012/m/6/5b4f202f-28c9-404a-84e6-13eef9980c3f.png" class=" logo" width="100%" alt="Responsive image">
+        </div>
+      </div>
+
+      <div class="row d-flex d-md-none justify-content-center">
+        <div class="col-5  offset-1 my-2">
+          <img src="https://www.hickoryfarms.com/on/demandware.static/-/Sites-HickoryFarms-Library/default/dw77bc7c81/images/logos/logo-mobile.svg" width="100%" alt="Responsive image">
+        </div>
+        <div class="col-1 align-self-end">
+          <button class="navbar-toggler navbar-light" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+            <div class="row d-none d-md-block nav-boarder">
+              <div class="col">
+               <nav class="navbar navbar-expand-md navbar-dark ">
+                  <div align="center" class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav nav-style mx-auto">
+                      <li class="nav-item pr-3 align-items-center">
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/gifts/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">GIFTS</a>
+                      </li>
+                      <li class="nav-item pr-3">
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/meat-cheese/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">MEAT &AMP; CHEESE</a>
+                      </li>
+                      <li class="nav-item pr-3">
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/steaks/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">STEAKS</a>
+                      </li>
+                      <li class="nav-item pr-3">
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/gourmet-food/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">GOURMET FOOD</a>
+                      </li>
+                      <li class="nav-item pr-3">
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/sweets/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">SWEETS</a>
+                      </li>
+
+                      <li class="nav-item pr-3">
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/holiday/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">HOLIDAY</a>
+                      </li>
+
+                      <li class="nav-item pr-3">
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/sale/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">SALE</a>
+                      </li>
+
+                      <li class="nav-item">
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/gifts/new/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">NEW</a>
+                      </li>
+
+                    </ul>
+                  </div>
+              </nav>
+            </div>
+          </div>
+        </div>
+
+        <div class="m-0 p-0" style="background-color:#ffffff;">
+          <div class="row m-0 p-0 d-lg-none">
+            <div class="col">
+              <nav class="navbar navbar-dark">
+                
+                  <div align="center" class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav nav-style mx-auto">
+                      <li class="nav-item pr-3 align-items-center">
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/gifts/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">GIFTS</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/meat-cheese/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">MEAT &AMP; CHEESE</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/steaks/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">STEAKS</a>
+                      </li>
+                      <li class="nav-item ">
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/gourmet-food/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">GOURMET FOOD</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/sweets/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">SWEETS</a>
+                      </li>
+
+                      <li class="nav-item ">
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/holiday/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">HOLIDAY</a>
+                      </li>
+
+                      <li class="nav-item ">
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/sale/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">SALE</a>
+                      </li>
+
+                      <li class="nav-item">
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/gifts/new/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">NEW</a>
+                      </li>
+
+                    </ul>
+                  </div>
+                </nav>
+              </div>
+            </div>
+          </div>
+
+<div class="container mx-auto mt-4 mb-4">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h4 align="center" style="text-align:center; line-height:35px;">
+              %%[if @exists == 0 then]%%
+              Thank you for signing up for our Business&nbsp;Gifting&nbsp;emails&nbsp;&amp;&nbsp;offers!
+              %%[else]%%
+              Looks like you're already on the list. Check your inbox for the latest offers from Hickory Farms!
+              %%[endif]%%
+            </h4>
+        </div>
+      </div>
+    </div>
+  
+    <div class="container mx-auto mt-4 mb-4">
+      <div class="row justify-content-center">
+        <div class="form-group row mt-3 mt-md-5">
+            <button type="submit" class="btn btn-red"><a align="center" href="https://www.hickoryfarms.com/business-gifts/" class="badge badge-pill badge-hf p-3 text-white">Visit Hickory Farms</a></button>
+        </div>
+      </div>
+    </div>
+</body>
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+</html>
