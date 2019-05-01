@@ -1,0 +1,662 @@
+
+%%[
+/* Admin list update/Removal */
+
+    /*Capture parameters Admin*/
+    set @newName = RequestParameter('newName')
+    set @catName = RequestParameter('catName')
+    set @option = RequestParameter('option')
+    set @script_entry = RequestParameter('script_entry')
+    
+    /*upsert data into DE*/
+    if  Empty(@newName) or Empty(@catName) then
+
+    else
+
+          if @option == 'add' and @catName != 'script_entry' then
+                UpsertData('B2BRep_DropDownOptions',1,'name',@newName,'category',@catName)
+                set @result = Concat('Success &mdash; ',ProperCase(@newName),' was added to the ', @catName, ' list.')
+
+          elseif @option == 'add' and @catName == 'script_entry' then
+                UpsertData('B2BRepLandingPageScripts',1,'name',@newName,'category',@catName,'script',@script_entry)
+                set @result = Concat('Success &mdash; ',ProperCase(@newName),' was added to the ', @catName, ' list.')
+
+          elseif @option == 'remove' and @catName != 'script_entry' then
+                DeleteData('B2BRep_DropDownOptions','name',@newName)
+                set @result = Concat('Success &mdash; ',ProperCase(@newName),' was removed from the ', @catName, ' list.')
+
+          elseif @option == 'remove' and @catName == 'script_entry' then
+                DeleteData('B2BRepLandingPageScripts','name',@newName)
+                set @result = Concat('Success &mdash; ',ProperCase(@newName),' was removed from the ', @catName, ' list.')
+
+          elseif @option == 'update' and @catName != 'script_entry' then
+                set @result = Concat('Success &mdash; Update your entry below and select <b>Add to list</b> to submit update.')
+                set @updateName = Lookup('B2BRep_DropDownOptions','name','name',@newName)
+
+          elseif @option == 'update' and @catName == 'script_entry' then
+                set @result = Concat('Success &mdash; Update your entry below and select <b>Add to list</b> to submit update.')
+                set @updateName = Lookup('B2BRepLandingPageScripts','name','name',@newName)
+                set @updateScript = Lookup('B2BRepLandingPageScripts','script','name',@newName)
+            
+          endif
+    endif
+
+
+/* Capture New Subscriber */
+
+/*Capture parameters and Set DE Variables*/
+      set @EmailAddress = RequestParameter('EmailAddress')
+      set @FirstName = RequestParameter('FirstName')
+      set @LastName = RequestParameter('LastName')
+      set @City = RequestParameter('City')
+      set @State = RequestParameter('stateName')
+      set @ZIP = RequestParameter('ZIP')
+      set @Company = RequestParameter('Company')
+      set @Phone = RequestParameter('Phone')
+      set @Title = RequestParameter('Title')
+
+      set @isPromoVendorCheck = RequestParameter('PromoVendorCheck')
+        if Empty(@isPromoVendorCheck) then
+          set @VendorType = 'General'
+        else
+          set @VendorType = 'Promo Vendor'
+        endif
+
+     set @CaptureRep_drop = RequestParameter('CaptureRep_drop')
+      set @CaptureRep_other = RequestParameter('CaptureRep_other')
+        if @CaptureRep_drop == 'Other' then
+          set @CaptureRep = @CaptureRep_other
+        else
+          set @CaptureRep = @CaptureRep_drop
+        endif
+
+      set @ContactMethod_drop = RequestParameter('ContactMethod_drop')
+      set @ContactMethod_other = RequestParameter('ContactMethod_other')
+        if @ContactMethod_drop == 'Other' then
+          set @ContactMethod = @ContactMethod_other
+        else
+          set @ContactMethod = @ContactMethod_drop
+        endif
+
+      set @CaptureDate = RequestParameter('CaptureDate')
+      set @acquisition_source = 'B2B_Rep_LandingPage'
+
+
+/*upsert data into DE*/
+if Empty(@EmailAddress) then
+
+else
+     /*lookups to see if they exist already or have received DOI confirmation email*/
+      set @b2bStagingLookup = RowCount(LookupRows('Hickory_Farms_Subscribers_B2B_Staging','EmailAddress',@EmailAddress))
+      set @hasReceived = RowCount(LookupRows('B2B_DOI_TSConfirmation','EmailAddress',@EmailAddress))
+      set @b2bLookup = RowCount(LookupRows('Hickory Farms Subscribers B2B','EmailAddress',@EmailAddress))
+
+          set @status = Lookup('_Subscribers','Status','EmailAddress',@EmailAddress)
+          set @AcquisitionDate = Lookup('Hickory_Farms_Subscribers_B2B_Staging','AcquisitionDate','EmailAddress',@EmailAddress)
+          set @HF_SubscribeDate = Lookup('Hickory_Farms_Subscribers_B2B_Staging','HF_SubscribeDate','EmailAddress',@EmailAddress)
+          set @DOI_SendDate = Lookup('B2B_DOI_TSConfirmation','TS_Date','EmailAddress',@EmailAddress)
+          set @DOI_DateFormat = FormatDate(@DOI_SendDate, 'MM/DD/YYYY')
+          set @DOI_confDate = Lookup('Hickory_Farms_Subscribers_B2B_Staging','doi_confirm_date','EmailAddress',@EmailAddress)
+
+      /*Subscriber Exists in B2B Subscribers Staging List*/
+      if @b2bStagingLookup >=1 then
+          
+          set @subscriber_result = Concat(@EmailAddress,' already exists.<br /> <br /><span class="response"><b>Acquisition Date:</b> ',@AcquisitionDate,'<br /> <b>Confirmation Email Sent on:</b> ',@DOI_DateFormat,'<br /><b>Subscribe Date:</b> ',@HF_SubscribeDate,'<br /><b>Subscriber Status:</b> ',@status,'</span>')
+
+      /*Does not exist in B2B Subscribers List but DOI Confirmation has been sent*/
+      elseif @b2bLookup == 0 and @hasReceived >= 1 then
+ 
+            set @subscriber_result = Concat(@EmailAddress,' was sent the confirmation email on ',@DOI_DateFormat, '.<br /><br /> Have them check their Spam/Junk folders or search their inbox. <br />
+            If they cannot find it please contact the Email Marketing Team for assistance!
+            ')
+
+      /*Does not exist in B2B Subscribers List and has not received DOI email*/
+      elseif @b2bLookup == 0 and @hasReceived == 0 then
+          if Empty(@CaptureRep) or Empty(@ContactMethod) then
+            set @subscriber_result = Concat('Please complete required fields.<br />Email Address | Rep Name | Contact Method')
+
+          else
+          set @subscriber_result = Concat('Success &mdash; ',@EmailAddress,' was added as a Subscriber.')
+
+          UpsertData(
+          'B2B_RepLandingPage_Staging',1,
+          'EmailAddress',@EmailAddress,
+          'First Name',@FirstName,
+          'Last Name',@LastName,
+          'AcquisitionDate',@CaptureDate,
+          'HF_SubscribeDate',@CaptureDate,
+          'Company',@Company,
+          'phone_number',@Phone,
+          'title',@Title,
+          'vendor_type',@VendorType,
+          'city',@City,
+          'state',@State,
+          'zip',@ZIP,
+          'inquire_method',@ContactMethod,
+          'rep_name',@CaptureRep,
+          'acquisition_source',@acquisition_source
+          )
+          
+          endif
+      endif
+endif 
+
+]%%
+
+
+<!-- Triggered Email Ampscript -->
+%%[if (Empty(@EmailAddress) OR @hasReceived >= 1 OR @b2blookup >= 1) then]%%
+<!-- don't send -->
+
+%%[else]%%
+<!-- send -->
+
+%%[
+var @ts, @tsDef, @ts_subkey, @ts_sub, @ts_statusCode, @errorCode
+
+
+   SET @ts = CreateObject("TriggeredSend")
+   SET @tsDef = CreateObject("TriggeredSendDefinition")
+   SET @ts_subkey = @EmailAddress 
+
+   SetObjectProperty(@tsDef, "CustomerKey", "B2B_OptInConfirmation")
+   SetObjectProperty(@ts, "TriggeredSendDefinition", @tsDef)
+
+   SET @ts_sub = CreateObject("Subscriber")
+   SetObjectProperty(@ts_sub, "EmailAddress", @EmailAddress)  
+
+   IF NOT EMPTY(@ts_subkey) THEN
+       SetObjectProperty(@ts_sub, "SubscriberKey", @ts_subkey)
+   ELSE
+       SetObjectProperty(@ts_sub, "SubscriberKey", @EmailAddress)
+   ENDIF 
+   AddObjectArrayItem(@ts, "Subscribers", @ts_sub)
+   SET @ts_statusCode = InvokeCreate(@ts, @ts_statusMsg, @errorCode)
+
+   IF @ts_statusCode != "OK" THEN
+       RaiseError(@ts_statusMsg, 0, @ts_statusCode, @errorCode)
+   ENDIF
+]%%
+
+%%[endif]%%
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <title>Hickory Farms</title>
+
+    <style>
+      h1 {
+        font-size:18px;
+        color:#cc0000;
+      }
+
+
+      h2 {
+        font-size:18px;
+        color:#444444;
+      }
+
+      h3 {
+        font-size:15px;
+        color:#444444;
+        padding-bottom: 5px;
+      }
+
+
+
+       .nav-style {
+        font-size:12px;
+        line-height:8px!important;
+        font-family:'Montserrat', sans-serif;
+        color:#333333;
+        text-align: center;
+        font-weight:500;
+    }
+
+     .nav-boarder {
+      border-top:1px solid #e2e2e2;
+      border-bottom:1px solid #e2e2e2;
+    }
+
+     .navbar-dark .navbar-nav .nav-link {
+      color:#333333!important;
+
+    }
+
+    .hf_red {color:#cc0000;}
+
+      .form-text {
+        font-size:14px;
+        color:#777777;
+      }
+
+      .content {
+        font-size:14px;
+        color:#777777;
+      }
+
+      .item-name {
+        font-size:14px;
+        color:#777777;
+        text-align: center;
+        line-height:16px;
+        display: block;
+
+      }
+
+       a.item-name:HOVER {
+        color:#444444;
+      }
+
+
+      .disclaimer, a.disclaimer:hover {
+       font-size:12px;
+        color:#777777;
+      }
+
+      .limit {
+        word-wrap:break-word;
+      }
+
+        .btn-red {
+        background-color:#cc0000!important;
+        color:#ffffff!important;
+        font-weight:600!important;
+        padding:10px 20px!important;
+      }
+
+      .btn-red:hover {
+        border:1px solid #ffffff;
+      }
+
+      .section {
+        padding:30px;
+        border:4px solid #f6f6f6;
+        background-color:#ffffff;
+      }
+
+      .section-outter {
+        padding:30px;
+        
+      }
+
+      .response {
+        line-height: 20px;
+      }
+      
+
+@media only screen and (max-width: 576px) { 
+  .remove-border {
+    border-right:none !important;
+    border:none !important;
+    margin:auto !important;
+  }
+
+  .nav-link {
+    text-align: center !important;
+    display:block !important;
+}
+
+ }
+    </style>
+  </head>
+  <body>
+    %%[
+    set @today = NOW()
+    ]%%
+   
+    <div class="container-fluid">
+      <div class="row d-none d-md-flex justify-content-center">
+        <div class="col-md-3 my-4">
+          <img src="http://image.e.hickoryfarms.com/lib/fe5a15707c610c7e7012/m/6/5b4f202f-28c9-404a-84e6-13eef9980c3f.png" class=" logo" width="100%" alt="Responsive image">
+        </div>
+      </div>
+
+    </div>
+
+            
+  <div class="container mt-3 mb-3">
+    <div class="row">
+      <div class="col-md-6 col-sm-6 mx-auto">
+        <h4 style="color:#555555;" class="text-center">Hickory Farms B2B Customer Email Signup</h4>
+      </div>
+    </div>
+  </div>
+
+                        
+
+<!-- ADMIN PANNEL START -->
+    %%[
+    set @admin = RequestParameter('hf_admin')
+
+    if @admin == 'true' then
+    ]%%
+    <div class="container-fluid" >
+      <div class="row">
+       <div class="col-md-10 col-xl-8 mb-4 section-outter shadow rounded mb-4">
+          <form id="js-form" method="post" action="http://cloud.e.hickoryfarms.com/b2brepoptin?hf_admin=true">
+            
+             <h1 class="hf_red">Admin</h1>
+             <h3>%%=iif(Empty(@newName),'',@result)=%%</h3>
+
+        <div class="section rounded">
+             <h2>Update Reps, Capture Method List, or Scripts</h2> 
+
+         <div class="form-row">
+            <div class="col-6 form-text pb-3 px-2">
+              <label class="">Rep Name or Method</label><br />
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <button class="btn btn-outline-secondary dropdown-toggle form-text form-control form-control-sm" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                  <div class="dropdown-menu">
+                    <div class="form-text pl-2 font-weight-bold">Existing Rep Names</div>
+                    %%[
+                        set @reps = LookupRows('B2BRep_DropDownOptions','category','rep_name')
+                        set @maxReps = RowCount(LookupRows('B2BRep_DropDownOptions','category','rep_name'))
+
+                         for @r = 1 TO @maxReps DO
+                          set @repRow = Row(@reps, @r)
+                          set @repName = Field(@repRow, 'name')
+                        ]%%   
+                        <div class="form-text pl-2" id="repName" value="%%=v(@repName)=%%">%%=v(@repName)=%%</div>
+                        %%[next @r]%%
+                        %%[end]%%
+                        <div role="separator" class="dropdown-divider"></div>
+                        <div class="form-text pl-2 font-weight-bold">Existing Methods</div>
+
+                        %%[
+                        set @method = LookupRows('B2BRep_DropDownOptions','category','method')
+                        set @maxMethods = RowCount(LookupRows('B2BRep_DropDownOptions','category','method'))
+
+                         for @m = 1 TO @maxMethods DO
+                          set @mRow = Row(@method, @m)
+                          set @mName = Field(@mRow, 'name')
+                        ]%%   
+                        <div class="form-text pl-2" id="methodName" value="%%=v(@mName)=%%">%%=v(@mName)=%%</div>
+                        %%[next @m]%%
+                        %%[end]%%
+                  </div>
+                </div>
+                <input class="form-text form-control form-control-sm" type="text" id="newName" name="newName" placeholder="Enter Name" value="%%=iif(Empty(@updateName),'',@updateName)=%%" />
+              </div>
+            </div>
+
+            <div class="col-6 form-text pb-3 px-2">
+              <label for="rep_name">Category</label><br />
+              <select id="rep_name" id="catName" name="catName" value="%%=v(@catName)=%%" class="col-12 form-text form-control form-control-sm" >
+                
+                <option class="form-text" id="defaultCat" name="defaultCat" selected disabled>Please associate a category</option>
+                %%[
+                  set @aCategory = LookupRows('B2BRep_DropDownOptions','category','accepted_category')
+                  set @maxCategories = RowCount(LookupRows('B2BRep_DropDownOptions','category','accepted_category'))
+
+                   for @c = 1 TO @maxCategories DO
+                    set @acatRow = Row(@aCategory, @c)
+                    set @acatName = Field(@acatRow, 'name')
+                  ]%%   
+                  <option class="form-text" id="catName" name="acatName" value="%%=v(@acatName)=%%">%%=v(@acatName)=%%</option>
+                  %%[next @c]%%
+                  %%[end]%%
+
+              </select>
+              </div>
+         </div>
+         <div class="form-row">
+          <div class="col-6 form-text pb-3 px-2">
+            <label for="script_entry">New Script Entry</label>
+            <textarea id="script_entry" name="script_entry" class="form-text form-control form-control-sm">%%=iif(Empty(@updateScript),'',@updateScript)=%%</textarea>
+          </div>
+         </div>
+
+           
+            <div class="form-group form-row">
+              <div class="radio pl-2 pr-5">
+                <label class="form-text">
+                  <input type="radio" name="option" id="option" value="add" checked>
+                  Add to list
+                </label>
+              </div>
+              <div class="radio pr-5">
+                <label class="form-text">
+                  <input type="radio" name="option" id="option" value="remove">
+                  Remove from List
+                </label>
+              </div>
+              <div class="radio">
+                <label class="form-text">
+                  <input type="radio" name="option" id="option" value="update">
+                  Update Item
+                </label>
+              </div>
+            </div>
+            
+            <div class="form-row justify-content-end p-0 m-0">
+              <div class="mt-4">
+                <button type="submit" class="btn btn-red btn-sm">Update List</button>
+            </div>
+          </div> 
+          </div>  
+        </form>
+      </div>
+      </div>
+
+    </div>
+    %%[endif]%%
+<!-- ADMIN PANNEL END -->
+
+
+
+
+<!-- CAPTURE CUSTOMER INFORMATION START -->
+    <div class="container-fluid">
+      <div class="row">
+       <div class="col-md-8 col-xl-8 mb-4 section-outter shadow rounded mb-4">
+       <h1 class="hf_red px-4">Customer Information</h1>
+         <h3 class="px-4">%%=iif(Empty(@EmailAddress),'',@subscriber_result)=%%</h3>
+        
+
+          <form id="js-form" method="post" action="http://cloud.e.hickoryfarms.com/b2brepoptin">
+            <div class="section rounded mb-4">
+              <div class="col-12 form-text pb-3 px-2">
+                  <label class="">Email Address*</label><br />
+                  <input class="col-12 form-text form-control form-control-sm" type="email" id="EmailAddress" name="EmailAddress" placeholder="Enter your email address" required/>
+              </div>
+
+            <div class="form-row p-0 m-0">
+              <div class="col-6 form-text pb-3 px-2 ">
+                  <label class="">First Name</label><br />
+                  <input class="col-12 form-text form-control form-control-sm" type="text" id="FirstName" name="FirstName" placeholder="First Name" />
+              </div>
+
+              <div class="col-6 form-text pb-3 px-2">
+                  <label class="">Last Name</label><br />
+                  <input class="col-12 form-text form-control form-control-sm" type="text" id="LastName" name="LastName" placeholder="Last Name" />
+              </div>
+            </div>
+
+            <div class="form-row p-0 m-0">
+              <div class="col-4 form-text pb-3 px-2 ">
+                  <label class="">City</label><br />
+                  <input class="col-12 form-text form-control form-control-sm" type="text" id="City" name="City" placeholder="City" />
+              </div>
+
+              <div class="col-4 form-text pb-3 px-2">
+                  <label for="inputState">State</label><br />
+                    <select id="inputState" id="stateName" name="stateName" value="%%=v(@stateName)=%%" class="col-12 py-h form-text form-control form-control-sm">
+                      <option class="form-text" id="stateName" name="stateName" value="" selected disabled>Please select a state</option>
+                      %%[
+                      set @states = LookupRows('B2BRep_DropDownOptions','category','state')
+                      set @maxStates = RowCount(LookupRows('B2BRep_DropDownOptions','category','state'))
+
+                       for @s = 1 TO @maxStates DO
+                        set @stateRow = Row(@states, @s)
+                        set @stateName = Field(@stateRow, 'name')
+                      ]%%   
+                      <option class="form-text form-control form-control-sm" id="stateName" value="%%=v(@stateName)=%%">%%=v(@stateName)=%%</option>
+                      %%[next @s]%%
+                      %%[end]%%
+                   
+                    </select>
+              </div>
+
+              <div class="col-4 form-text pb-3 px-2">
+                  <label class="">ZIP [12345]</label><br />
+                  <input class="col-12 form-text form-control form-control-sm" type="text" id="ZIP" name="ZIP" placeholder="ZIP" />
+              </div>
+            </div>
+
+              <div class="col-12 form-text pb-3 px-2">
+                  <label class="">Company Name</label><br />
+                  <input class="col-12 form-text form-control form-control-sm" type="text" id="Company" name="Company" placeholder="Company Name" />
+              </div>
+
+             <div class="form-row p-0 m-0">
+                <div class="col-6 form-text pb-3 px-2 ">
+                    <label class="">Title</label><br />
+                    <input class="col-12 form-text form-control form-control-sm" type="text" id="Title" name="Title" placeholder="Title" />
+                </div>
+
+                <div class="col-6 form-text pb-3 px-2">
+                    <label class="">Phone Number [1234567890]</label><br />
+                    <input class="col-12 form-text form-control form-control-sm" type="text" id="Phone" name="Phone" placeholder="Phone Number" />
+                </div>
+            </div>
+
+            <div class="form-check form-check-inline form-text px-2">
+            <input class="form-check-input" type="checkbox" id="PromoVendorCheck" name="PromoVendorCheck" value="Promo">
+            <label class="form-check-label" for="PromoVendorCheck">Customer is a promo vendor</label>
+          </div>
+              
+            </div>
+
+
+            <div class="section rounded">
+              <h6 class="hf_red">Rep Information</h6>
+                 <div class="form-row p-0 m-0">
+                  <div class="col-md-10 col-xl-8 form-text pb-3 px-2">
+                      <label for="rep_name" >Rep Name*</label><br />
+                        <select id="rep_name"  id="CaptureRep_drop" name="CaptureRep_drop" value="%%=v(@repName)=%%" class="col-12 form-text form-control form-control-sm" required>
+                          <option class="form-text" id="CaptureRep_drop" name="CaptureRep_drop" selected disabled>Please associate a Rep</option>
+                          %%[
+                            set @reps = LookupRows('B2BRep_DropDownOptions','category','rep_name')
+                            set @maxReps = RowCount(LookupRows('B2BRep_DropDownOptions','category','rep_name'))
+
+                             for @r = 1 TO @maxReps DO
+                              set @repRow = Row(@reps, @r)
+                              set @repName = Field(@repRow, 'name')
+                            ]%%   
+                            <option class="form-text" id="CaptureRep_drop" name="CaptureRep_drop" value="%%=v(@repName)=%%">%%=v(@repName)=%%</option>
+                            %%[next @r]%%
+                            %%[end]%%
+                            <option class="form-text" id="CaptureRep_drop" name="CaptureRep_drop" value="other">Other</option>
+                        </select>
+                  </div>
+                  <div id="rep_other" class="col-4 form-text pb-3 px-2 other_hide">
+                      <label class="">Rep Name Other</label><br />
+                      <input class="col-12 form-text form-control form-control-sm" type="text" id="CaptureRep_other" name="CaptureRep_other" placeholder="Only use if needed" />
+                  </div>    
+                </div>
+
+                <div class="form-row p-0 m-0">
+                  <div class="col-4 form-text pb-3 px-2 ">
+                      <label class="">Capture Date*</label><br />
+                      <input class="col-12 form-text form-control form-control-sm" type="text" id="CaptureDate" name="CaptureDate" value="%%=v(@today)=%%" readonly="true" />
+                  </div>
+
+                  <div class="col-4 form-text pb-3 px-2">
+                      <label for="inputState">Contact Method*</label><br />
+                        <select id="ContactMethod_drop" name="ContactMethod_drop" value="%%=v(@mName)=%%" class="col-12 py-h form-text form-control form-control-sm" required>
+                          <option class="form-text" id="ContactMethod_drop" name="ContactMethod_drop" selected disabled>Please select a contact method</option>
+                           %%[
+                            set @method = LookupRows('B2BRep_DropDownOptions','category','method')
+                            set @maxMethods = RowCount(LookupRows('B2BRep_DropDownOptions','category','method'))
+
+                             for @m = 1 TO @maxMethods DO
+                              set @mRow = Row(@method, @m)
+                              set @mName = Field(@mRow, 'name')
+                            ]%%   
+                            <option class="form-text" id="ContactMethod_drop" name="ContactMethod_drop" value="%%=v(@mName)=%%">%%=v(@mName)=%%</option>
+                            %%[next @m]%%
+                            %%[end]%%
+                            <option class="form-text" id="ContactMethod_drop" name="ContactMethod_drop" value="Other">Other</option>
+                        </select>
+                  </div>
+                  <div class="col-4 form-text pb-3 px-2 ">
+                      <label class="">Method Other</label><br />
+                      <input class="col-12 form-text form-control form-control-sm" type="text" id="ContactMethod_other" name="ContactMethod_other" placeholder="Only use if needed" />
+                  </div>
+                  <div class="form-check form-check-inline form-text px-2">
+                    <input class="form-check-input" type="checkbox" id="confirmation" required>
+                    <label class="form-check-label" for="confirmation">Please confirm all information is correct.*</label>
+                  </div>
+                </div>
+              </div>
+
+             <div class="form-group row  mt-4 float-right">
+                <button type="submit" class="btn btn-red">Add Subscriber</button>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="col-4">
+            <div class="section-outter shadow rounded">
+              <div class="row">
+                <div class="col-9">
+                  <h1>Talking Points</h1>
+                 %%[
+                  set @scriptRows = LookupRows('B2BRepLandingPageScripts','category','script_entry')
+                  set @scriptCount = rowcount(LookupRows('B2BRepLandingPageScripts','category','script_entry'))
+
+               
+                  for @s = 1 to @scriptCount do
+                    set @row = row(@scriptRows, @s)
+                    set @title = field(@row, 'name')
+                    set @script = field(@row, 'script')
+                    ]%%
+
+                    <h3 class="pb-0 mb-0">%%=v(@title)=%%</h3>
+                    <p class="pl-2">%%=v(@script)=%%</p>
+
+                    <br />
+                  %%[next @s]%%
+
+                  %%[end]%%
+
+                <hr />
+
+                <h1>Email Collection Requirements</h1>
+                  <p>The main customer information to collect is their email address; all other customer information is optional.<br /><br />All Rep Informatin is required. If you do not see your name or the appropriate contact method listed; select <b>other</b> from the drop down menu and use the <b>other fields</b></p>
+
+                </div>
+              </div>
+            </div>
+        </div>
+    
+    </div>
+
+    
+    <div class="container-fluid">
+      <div class="row p-0 py-md-4 m-0">
+          <div class="col-12 col-md-6 mx-auto">
+            <hr />
+            <a class="disclaimer text-left" href="https://www.hickoryfarms.com/privacy-security/privacy-policy.html">Privacy Policy</a>
+          </div>
+       </div>
+    </div>
+
+</div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  </body>
+</html> 
