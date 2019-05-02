@@ -62,6 +62,9 @@ Admin Capabilities of this page
                 set @result = Concat('Success &mdash; Update your entry below and select <b>Add to list</b> to submit update.')
                 set @updateName = Lookup('B2BRepLandingPageScripts','name','name',@newName)
                 set @updateScript = Lookup('B2BRepLandingPageScripts','script','name',@newName)
+
+          elseif not Empty(@script_entry) and (@catName != 'script_entry' or Empty(@newName)) then
+                set @result = Concat('Please enter a name for your script or change the category to script_entry.')
             
           endif
     endif
@@ -105,7 +108,7 @@ Admin Capabilities of this page
 
       set @CaptureDate = RequestParameter('CaptureDate')
       set @acquisition_source = 'B2B_Rep_LandingPage'
-
+      set @totalOptIns = DataExtensionRowCount('B2B_DOI_TSConfirmation')
 
 /*upsert data into DE*/
 if Empty(@EmailAddress) then
@@ -483,13 +486,24 @@ var @ts, @tsDef, @ts_subkey, @ts_sub, @ts_statusCode, @errorCode
           </div>  
         </form>
       </div>
-      </div>
 
-<div class="row">
-  <div class="col-7">
-    %%=v(@hasReceived)=%%
-  </div>
-</div>
+<!-- Admin Side Bar Start
+      <div class="col-5">
+            <div class="section-outter shadow rounded">
+              <div class="row">
+                <div class="col-10">
+                  <!-- Place all right sidebar content below this point 
+                  
+
+                  <!-- Place all Right Sidebar Content above this point
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      -->
+
+
     </div>
     %%[endif]%%
 <!-- ADMIN PANNEL END -->
@@ -685,8 +699,7 @@ var @ts, @tsDef, @ts_subkey, @ts_sub, @ts_statusCode, @errorCode
                   <ul class="list-style">
                     <li><a href="https://www.hickoryfarms.com/business-gifting">Hickory Farms Business Gifting</a></li>
                     <li><a href="#">Promotional Vendor Page</a></li>
-                    <li><a href="#">Contact Email Marketing Team</a></li>
-
+                    <li><a href="mailto:tony.zupancic@hickoryfarms.com?subject=B2B%20Team%20Landing%20Page%20Assistance.&cc=ashley.merchant@hickoryfarms.com;%20jessica.butler@hickoryfarms.com">Contact Email Marketing Team</a></li>
                   </ul>
 
 
