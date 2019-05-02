@@ -63,7 +63,7 @@ Admin Capabilities of this page
                 set @updateName = Lookup('B2BRepLandingPageScripts','name','name',@newName)
                 set @updateScript = Lookup('B2BRepLandingPageScripts','script','name',@newName)
 
-          elseif not Empty(@script_entry) and (@catName != 'script_entry' or Empty(@newName)) then
+          elseif (NOT Empty(@script_entry)) and (@catName != 'script_entry' or Empty(@newName)) then
                 set @result = Concat('Please enter a name for your script or change the category to script_entry.')
             
           endif
