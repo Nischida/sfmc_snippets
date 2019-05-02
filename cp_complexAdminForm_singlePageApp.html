@@ -1,3 +1,29 @@
+<!-- 
+Data Extensions Needed
+-- Form Capture Staging; Holds subscribers data until DOI is complete.
+-- Triggered Send Data Extension; Holds subscriber send details for triggered email.
+-- B2B Staging; Holds subscriber data for Welcome Journey entry event.
+-- B2B Subscribers; Master record of all B2B Subscribers in this flow.
+-- -- Subscribers are placed here via automation daily.
+
+Capabilities of this page
+-- Collect Subscriber Information
+-- -- Email Address | First Name | Last Name | City | State | Zip | Company | Title | Phone Number
+-- Initial check to see if subscriber exists in the following locations
+-- -- Triggered Send DE | B2B Staging | B2B Subscribers
+-- -- If false; captures data and triggers email.
+-- -- If exists in B2B subscribers; does not capture/trigger email, displays subscriber information
+-- -- -- Email Address | Date of Acquisition | Triggered Send Date | DOI Date | subscriber status
+-- -- If exists in B2B staging; does not capture/trigger email, displays date of interaction, directs customer to check their junk or spam folders
+-- -- -- Email Address | Triggered Send Date
+
+Admin Capabilities of this page
+-- Add new Rep Name to list for Drop Down Menu
+-- Add new Capture Method to list for Drop Down Menu
+-- Add new script entry to list for side menu
+
+ -->
+
 
 %%[
 /* Admin list update/Removal */
@@ -12,7 +38,6 @@
     if  Empty(@newName) or Empty(@catName) then
 
     else
-
           if @option == 'add' and @catName != 'script_entry' then
                 UpsertData('B2BRep_DropDownOptions',1,'name',@newName,'category',@catName)
                 set @result = Concat('Success &mdash; ',ProperCase(@newName),' was added to the ', @catName, ' list.')
@@ -278,8 +303,12 @@ var @ts, @tsDef, @ts_subkey, @ts_sub, @ts_statusCode, @errorCode
 
       .section {
         padding:30px;
-        border:4px solid #f6f6f6;
+        border-bottom:2px solid #f6f6f6;
         background-color:#ffffff;
+      }
+
+      .section-divider {
+        border-bottom:2px solid #f6f6f6;
       }
 
       .section-outter {
@@ -289,6 +318,15 @@ var @ts, @tsDef, @ts_subkey, @ts_sub, @ts_statusCode, @errorCode
 
       .response {
         line-height: 20px;
+      }
+
+      .list-style, .list-style a {
+        list-style: none;
+        color:#777777;
+      }
+
+      .list-style:hover a {
+        color:#444444;
       }
       
 
@@ -338,9 +376,9 @@ var @ts, @tsDef, @ts_subkey, @ts_sub, @ts_statusCode, @errorCode
 
     if @admin == 'true' then
     ]%%
-    <div class="container-fluid" >
-      <div class="row">
-       <div class="col-md-10 col-xl-8 mb-4 section-outter shadow rounded mb-4">
+    <div class="container-fluid">
+      <div class="row ml-2">
+       <div class="col-md-7 mb-4 section-outter shadow rounded mb-4">
           <form id="js-form" method="post" action="http://cloud.e.hickoryfarms.com/b2brepoptin?hf_admin=true">
             
              <h1 class="hf_red">Admin</h1>
@@ -447,6 +485,11 @@ var @ts, @tsDef, @ts_subkey, @ts_sub, @ts_statusCode, @errorCode
       </div>
       </div>
 
+<div class="row">
+  <div class="col-7">
+    %%=v(@hasReceived)=%%
+  </div>
+</div>
     </div>
     %%[endif]%%
 <!-- ADMIN PANNEL END -->
@@ -456,8 +499,8 @@ var @ts, @tsDef, @ts_subkey, @ts_sub, @ts_statusCode, @errorCode
 
 <!-- CAPTURE CUSTOMER INFORMATION START -->
     <div class="container-fluid">
-      <div class="row">
-       <div class="col-md-8 col-xl-8 mb-4 section-outter shadow rounded mb-4">
+      <div class="row ml-2">
+       <div class="col-md-7 mb-4 section-outter shadow rounded mb-4">
        <h1 class="hf_red px-4">Customer Information</h1>
          <h3 class="px-4">%%=iif(Empty(@EmailAddress),'',@subscriber_result)=%%</h3>
         
@@ -606,10 +649,11 @@ var @ts, @tsDef, @ts_subkey, @ts_sub, @ts_statusCode, @errorCode
           </form>
         </div>
 
-        <div class="col-4">
+        <div class="col-5">
             <div class="section-outter shadow rounded">
               <div class="row">
-                <div class="col-9">
+                <div class="col-10">
+                <!-- Place all right sidebar content below this point -->
                   <h1>Talking Points</h1>
                  %%[
                   set @scriptRows = LookupRows('B2BRepLandingPageScripts','category','script_entry')
@@ -630,35 +674,28 @@ var @ts, @tsDef, @ts_subkey, @ts_sub, @ts_statusCode, @errorCode
 
                   %%[end]%%
 
-                <hr />
+                <div class="section-divider my-3"> </div>
 
                 <h1>Email Collection Requirements</h1>
-                  <p>The main customer information to collect is their email address; all other customer information is optional.<br /><br />All Rep Informatin is required. If you do not see your name or the appropriate contact method listed; select <b>other</b> from the drop down menu and use the <b>other fields</b></p>
+                  <p>The main customer information to collect is their email address; all other customer information is optional.<br /><br /><b>All Rep Informatin is required.</b><br /> If you do not see your name or the appropriate contact method listed; select <b>other</b> from the drop down menu and use the <b>other fields</b></p>
+
+                  <div class="section-divider my-3"> </div>
+
+                  <h1>Helpful Links</h1>
+                  <ul class="list-style">
+                    <li><a href="https://www.hickoryfarms.com/business-gifting">Hickory Farms Business Gifting</a></li>
+                    <li><a href="#">Promotional Vendor Page</a></li>
+                    <li><a href="#">Contact Email Marketing Team</a></li>
+
+                  </ul>
+
+
+                  <!-- Place all Right Sidebar Content above this point -->
                 </div>
               </div>
-
-            <div class="row">
-              <div class="col-9">
-              <hr />
-               <form>
-                 <div class="form-row p-0 m-0">
-                    <div class="col-12 form-text pb-3 px-2 ">
-                      <label class="">Email Address to Check</label><br />
-                      <input class="col-12 form-text form-control form-control-sm" type="email" id="emailCheck" name="emailCheck" placeholder="EmailAddress" />
-                    </div>
-                  </div>
-                
-                   <div class="form-row mt-4 px-2 float-right">
-                    <button type="submit" class="btn btn-red">Search for Subscriber</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            </div>
         </div>
-    
     </div>
+  </div>
 
     
     <div class="container-fluid">
