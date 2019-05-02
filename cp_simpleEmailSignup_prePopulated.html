@@ -1,3 +1,12 @@
+<!-- 
+Page can be used for:
+-- Double Opt in
+-- Basic Email Lead Page
+-- -- Remove PrePopulated query string selector
+-- -- Remove AMPscript controll to hide form if no email passed via email
+
+-->
+
 <!DOCTYPE html>
 <html lang="en">
  <head>
@@ -290,15 +299,18 @@
 ]%%
 
 <div class="row">
-  <div class="col-12 col-md-6 mx-auto text-center pt-3 pt-md-5">
-    <h3 style="color:#555555;" class="h3-lh">Let’s talk business!</h3> 
-    <h4 style="color:#555555; font-size:20px;">Sign me up for Hickory Farms Business Gifting emails with exclusive offers and gift ideas.</h4>
+  <div class="col-12 col-md-8 mx-auto text-center pt-3 pt-md-5">
+    %%[if Empty(@EmailAddress) then]%%
+      <h3 style="color:#555555;" class="h3-lh">Please visit this page through a Hickory Farms confirmation email.</h3>
+      <h4 style="color:#555555; font-size:20px;">Please reach out to a Hickory Farms representitive for further assistance.</h4>
+    %%[else]%%
+      <h3 style="color:#555555;" class="h3-lh">Let’s talk business!</h3> 
+      <h4 style="color:#555555; font-size:20px;">Sign me up for Hickory Farms Business Gifting emails with exclusive offers and gift ideas.</h4>
   </div>
 </div>
 
           <div class="row p-0 m-0">
             <div class="col-10 col-md-5 mx-auto m-0 pt-3 pt-md-5">
-              
                           <form class="" id="js-form" method="post" action="http://cloud.e.hickoryfarms.com/businessgiftingthank-you">
                             <div class="form-group row">
                               <div class="col-sm-12 col-md-9 mb-4 mb-md-3">
@@ -317,12 +329,13 @@
                                 <button type="submit" class="btn btn-red ">Submit</button>
                             </div>
                           </form>
+              %%[endif]%%
               </div>         
         </div>
 
     <div class="container-fluid">
-      <div class="row p-0 py-md-4 m-0">
-          <div class="col-12 col-md-6 mx-auto">
+      <div class="row p-0 py-md-3 m-0">
+          <div class="col-10 mx-auto">
             <hr />
             <small id="emailHelp" class=" text-muted pb-4">We do not share or sell personal information.</small><br />
             <a class="disclaimer text-left" href="https://www.hickoryfarms.com/privacy-security/privacy-policy.html">View our Privacy Policy</a>
