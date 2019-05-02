@@ -1,29 +1,16 @@
-<!-- 
-Page can be used for:
--- Double Opt in
--- Basic Email Lead Page
--- -- Remove PrePopulated query string selector
--- -- Remove AMPscript controll to hide form if no email passed via email
-
--->
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
- <head>
-  <!-- Required meta tags -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Hickory Farms Business Gifting</title>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> 
+    <!-- Bootstrap CSS -->
+   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> 
      <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <title>Hickory Farms</title>
 
-      <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-      <script src="https://unpkg.com/gijgo@1.9.11/js/gijgo.min.js" type="text/javascript"></script>
-      <link href="https://unpkg.com/gijgo@1.9.11/css/gijgo.min.css" rel="stylesheet" type="text/css" />
-
-  <style>
+    <style>
       body {
         overflow-x: hidden;
         color:#777777;
@@ -184,22 +171,12 @@ Page can be used for:
 
 
 
+
+
 </style>
- </head>
- <body class="m-0 p-0">
-
-<!--main logo
-  http://image.e.hickoryfarms.com/lib/fe5a15707c610c7e7012/m/6/5b4f202f-28c9-404a-84e6-13eef9980c3f.png
--->
-<!-- mobile logo
-  https://www.hickoryfarms.com/on/demandware.static/-/Sites-HickoryFarms-Library/default/dw77bc7c81/images/logos/logo-mobile.svg
--->
-<!-- mobile toggle
-  <button class="navbar-toggler navbar-light" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
--->
-
+  </head>
+  <body>
+   
     <div class="container-fluid">
       <div class="row d-none d-md-flex justify-content-center">
         <div class="col-md-3 my-4">
@@ -292,53 +269,55 @@ Page can be used for:
             </div>
           </div>
 
-%%[
-  set @EmailAddress = RequestParameter('addr')
-]%%
-
-<div class="row">
-  <div class="col-8 mx-auto text-center mb-2 mb-md-3">
-    %%[if Empty(@EmailAddress) then]%%
-      <h3 style="color:#555555;" class="h3-lh">Please visit this page through a Hickory Farms confirmation email.</h3>
-      <h4 style="color:#555555; font-size:20px;">Please reach out to a Hickory Farms representitive for further assistance.</h4>
-    %%[else]%%
-      <h3 style="color:#555555;" class="h3-lh">Let’s talk business!</h3> 
-      <h4 style="color:#555555; font-size:20px;">Sign me up for Hickory Farms Business Gifting emails with exclusive offers and gift ideas.</h4>
-    %%[endif]%%
+  <div class="container mt-3 mb-3">
+    <div class="row ">
+      <div class="col-8 col-md-6 offset-md-3 text-center mx-auto">
+        <h4 style="color:#555555;">Sign up for Business Gifting Emails &amp; Offers</h4>
+      </div>
+    </div>
   </div>
-</div>
 
-    %%[if Empty(@EmailAddress) then]%%
-    %%[else]%%
-    <div class="container-fluid">
-          <div class="row p-0 m-0">
-            <div class="col-6 mx-auto">
-              <form class="" id="js-form" method="post" action="http://cloud.e.hickoryfarms.com/businessgiftingthank-you">
-                <div class="form-group row">
-                  <div class="col-12 mb-4 mb-md-3 px-2">
-                    <label>Email Address:*</label>
-                    <input type="email" class="col-12 form-text form-control form-control-sm" name="EmailAddress" value="%%=v(@EmailAddress)=%%" id="EmailAddress"  required readonly>
-                  </div>
-                </div>
-
-              <div class="form-group row">
-               <div class="checkbox px-2">
-                 <label class="checkbox-inline">
-                    <input type="checkbox" id="doi_confirm" name="doi_confirm" value="doi_confirmed" required><span class="pr-2"> Yes, I would like to recieve emails from Hickory Farms.*</span>
-                  </label><br />
-                </div>
+    
+    <div class="container mx-auto">
+      <div class="row">
+        <div class="col-md-6 col-sm-6 offset-md-3">
+          <form class="mx-auto" id="js-form" method="post" action="http://cloud.e.hickoryfarms.com/businessgiftingthank-you">
+              <div class="mx-auto form-row form-text px-2 pb-3">
+                  <label class="">Email Address</label><br />
+                  <input class="col-12 form-text form-control form-control-sm" type="email" id="EmailAddress" name="EmailAddress" placeholder="Enter your email address" required="true"/>
               </div>
-                               
-                <div class="row mt-1 justify-content-md-end justify-content-center pr-2">
-                  <button type="submit" class="btn btn-red">Submit</button>
-                </div>
-              </form>
-            </div>         
+
+            <div class="form-row p-0 m-0">
+              <div class="col-6 form-text pb-3 px-2 ">
+                  <label class="">First Name</label><br />
+                  <input class="col-12 form-text form-control form-control-sm" type="text" id="FirstName" name="FirstName" placeholder="First Name" />
+              </div>
+
+              <div class="col-6 form-text pb-3 px-2">
+                  <label class="">Last Name</label><br />
+                  <input class="col-12 form-text form-control form-control-sm" type="text" id="LastName" name="LastName" placeholder="Last Name" />
+              </div>
+            </div>
+
+              <div class="mx-auto form-text form-row px-2 pb-3">
+                  <label class="">Company Name</label><br />
+                  <input class="col-12 form-control form-text form-control form-control-sm" type="text" id="CompanyName" name="CompanyName" placeholder="Company Name" />
+              </div>
+             
+
+             <div class="row mt-1 justify-content-md-end justify-content-center pr-4">
+                <button type="submit" class="btn btn-red">Submit</button>
+            </div>
+              <input value="B2B_LandingPage" type="text" name="acquisition_source" class="invisible"/>
+              <input value="General" type="text" name="vendor_type" class="invisible"/>
+
+          </form>
         </div>
       </div>
-%%[endif]%%
+    </div>
+
     <div class="container-fluid">
-      <div class="row p-0 py-md-3 m-0">
+      <div class="row p-0 m-0">
           <div class="col-10 mx-auto">
             <hr />
             <small id="emailHelp" class=" text-muted pb-4">We do not share or sell personal information.</small><br />
@@ -346,10 +325,12 @@ Page can be used for:
           </div>
        </div>
     </div>
-</body>
-  <!-- Optional JavaScript -->
-  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
+</div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-</html>
+  </body>
+</html> 
