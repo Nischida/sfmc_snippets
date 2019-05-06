@@ -59,7 +59,7 @@ Admin Capabilities of this page
                 set @updateName = Lookup('B2BRep_DropDownOptions','name','name',@newName)
 
           elseif @option == 'update' and @catName == 'script_entry' then
-                set @result = Concat('Success &mdash; Update your entry below and select <b>Add to list</b> to submit update.')
+                set @result = Concat('Success &mdash; Update your entry below and select <b>Add to list</b> to submit update.<br /><i style="font-size:12px;">Note: <br />If you need to update the script title, you must delete the entry and add it as a new entry.</i>')
                 set @updateName = Lookup('B2BRepLandingPageScripts','name','name',@newName)
                 set @updateScript = Lookup('B2BRepLandingPageScripts','script','name',@newName)
 
@@ -699,7 +699,7 @@ var @ts, @tsDef, @ts_subkey, @ts_sub, @ts_statusCode, @errorCode
                   <ul class="list-style">
                     <li><a href="https://www.hickoryfarms.com/business-gifting">Hickory Farms Business Gifting</a></li>
                     <!-- <li><a href="#">Promotional Vendor Page</a></li> -->
-                    <li><a href="mailto:tony.zupancic@hickoryfarms.com?subject=B2B%20Team%20Landing%20Page%20Assistance.&cc=ashley.merchant@hickoryfarms.com;%20jessica.butler@hickoryfarms.com">Contact Email Marketing Team</a></li>
+                    <li><a href="mailto:jessica.butler@hickoryfarms.com?subject=B2B%20Team%20Landing%20Page%20Assistance&cc=ashley.merchant@hickoryfarms.com">Contact Email Marketing Team</a></li>
                   </ul>
 
 
