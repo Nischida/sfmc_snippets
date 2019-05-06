@@ -1,0 +1,24 @@
+<!-- 
+Simple for Loop AMPScript
+
+- Select all rows to loop through via LookupRows Function
+- Set max number to loop through
+-- -- if all use RowCount to get the total number of rows found
+- In Loop use Row to select the variable row number
+- In Loop use Field to select what field to populate for that row
+- Output can include any code/variable output needed within that loop
+- Use "next @var" to move to the next row
+ -->
+
+%%[
+set @rows = LookupRows('DE_name','Lookup Field','Lookup Value')
+set @maxRows = RowCount(LookupRows('DE_name','Lookup Field','Lookup Value'))
+
+ for @i = 1 TO @maxReps DO
+  set @selectedRow = Row(@rows, @i)
+  set @selectedFieldName = Field(@selectedRow, 'field to populate')
+]%%   
+<div>%%=v(@selectedFieldName)=%%</div>
+
+%%[next @r]%%
+%%[end]%%

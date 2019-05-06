@@ -1,3 +1,10 @@
+<!-- 
+This page is used to handle to Double Opt-In submissions
+-- Checks to see if subscriber comes from an Event or Rep Signup
+-- -- Depending on where they originate from changes where their subscriber data pulled from
+-- Takes captured data from respective extension and creates a record in the Staging/Welcome DE
+-->
+
 <!DOCTYPE html>
 <html lang="en">
  <head>
@@ -17,6 +24,7 @@
   <style>
       body {
         overflow-x: hidden;
+        color:#777777;
       }
 
     .bgimg {
@@ -53,10 +61,8 @@
     }
     
       .form-text {
-        font-size:18px;
-        color:#000000;
-      font-family:'Montserrat', sans-serif;
-
+        font-size:12px;
+        color:#777777;
       }
 
       .content {
@@ -90,10 +96,9 @@
 
       }
 
-      .disclaimer {
-        font-size:10px;
-        font-family:'Montserrat', sans-serif;
-        color:#000000;
+ .disclaimer, a.disclaimer:hover {
+       font-size:12px;
+        color:#777777;
       }
 
       .limit {
@@ -122,7 +127,8 @@
 
 .gj-icon {color:#777777!important;}
 
-.h3-lh {line-height:40px;}
+.h3-lh {line-height:60px;}
+
 
 
 @media only screen and (max-width: 576px) { 
@@ -173,9 +179,6 @@
 .ham-nav-margin {
   margin-top:-35px;
  }
-
-
-}
 
 
 </style>
@@ -294,39 +297,34 @@ if NOT Empty(@EmailAddress) then
       </div>
     </div>
 
-            <div class="row d-none d-md-block nav-boarder">
+           <div class="row d-none d-md-block nav-boarder">
               <div class="col">
                <nav class="navbar navbar-expand-md navbar-dark ">
                   <div align="center" class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav nav-style mx-auto">
                       <li class="nav-item pr-3 align-items-center">
-                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/gifts/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">GIFTS</a>
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/gifts/">GIFTS</a>
                       </li>
                       <li class="nav-item pr-3">
-                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/meat-cheese/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">MEAT &AMP; CHEESE</a>
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/meat-cheese/">MEAT &AMP; CHEESE</a>
                       </li>
                       <li class="nav-item pr-3">
-                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/steaks/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">STEAKS</a>
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/steaks/">STEAKS</a>
                       </li>
                       <li class="nav-item pr-3">
-                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/gourmet-food/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">GOURMET FOOD</a>
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/gourmet-food/">GOURMET FOOD</a>
                       </li>
                       <li class="nav-item pr-3">
-                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/sweets/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">SWEETS</a>
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/sweets/">SWEETS</a>
                       </li>
 
                       <li class="nav-item pr-3">
-                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/holiday/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">HOLIDAY</a>
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/holiday/">HOLIDAY</a>
                       </li>
 
                       <li class="nav-item pr-3">
-                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/sale/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">SALE</a>
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/business-gifts/">BUSINESS GIFTS</a>
                       </li>
-
-                      <li class="nav-item">
-                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/gifts/new/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">NEW</a>
-                      </li>
-
                     </ul>
                   </div>
               </nav>
@@ -342,31 +340,27 @@ if NOT Empty(@EmailAddress) then
                   <div align="center" class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav nav-style mx-auto">
                       <li class="nav-item pr-3 align-items-center">
-                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/gifts/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">GIFTS</a>
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/gifts/">GIFTS</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/meat-cheese/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">MEAT &AMP; CHEESE</a>
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/meat-cheese/">MEAT &AMP; CHEESE</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/steaks/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">STEAKS</a>
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/steaks/">STEAKS</a>
                       </li>
                       <li class="nav-item ">
-                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/gourmet-food/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">GOURMET FOOD</a>
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/gourmet-food/">GOURMET FOOD</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/sweets/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">SWEETS</a>
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/sweets/">SWEETS</a>
                       </li>
 
                       <li class="nav-item ">
-                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/holiday/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">HOLIDAY</a>
-                      </li>
-
-                      <li class="nav-item ">
-                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/sale/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">SALE</a>
+                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/holiday/">HOLIDAY</a>
                       </li>
 
                       <li class="nav-item">
-                        <a class="nav-link nav-style " href="https://www.hickoryfarms.com/gifts/new/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-bdy">NEW</a>
+                        <a class="nav-link nav-style" href="https://www.hickoryfarms.com/business-gifts/">BUSINESS GIFTS</a>
                       </li>
 
                     </ul>
