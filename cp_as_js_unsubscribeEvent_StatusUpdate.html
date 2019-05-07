@@ -1,0 +1,66 @@
+%%[
+VAR @PreferenceRows,@SubscriberRows
+/*SET @SubscriberID = RequestParameter('sid')*/
+SET @SubscriberKey = RequestParameter('sk')
+SET @JobID = RequestParameter('j')
+SET @options = RequestParameter('opt')
+SET @SubscriberRows = LookupRows('Preferences','SubscriberKey',@SubscriberKey)
+
+IF RowCount(@SubscriberRows) > 0 THEN
+  SET @r = ROW(@SubscriberRows,1)
+  SET @EmailAddress = Field(@r, 'EmailAddress')
+
+  IF @options == 1 THEN
+    UpsertData('Preferences',1,'SubscriberKey',@SubscriberKey,'EmailAddress',@EmailAddress,'AllNews',1,'90Day',0,'90DayTS',null,'Monthly',0,'Christmas',0,'Unsubscribe',0)
+  ELSEIF @options == 2 THEN
+    UpsertData('Preferences',1,'SubscriberKey',@SubscriberKey,'EmailAddress',@EmailAddress,'AllNews',0,'90Day',1,'90DayTS',NOW(),'Monthly',0,'Christmas',0,'Unsubscribe',0)
+  ELSEIF @options == 3 THEN
+    UpsertData('Preferences',1,'SubscriberKey',@SubscriberKey,'EmailAddress',@EmailAddress,'AllNews',0,'90Day',0,'90DayTS',null,'Monthly',1,'Christmas',0,'Unsubscribe',0)
+  ELSEIF @options == 4 THEN
+    UpsertData('Preferences',1,'SubscriberKey',@SubscriberKey,'EmailAddress',@EmailAddress,'AllNews',0,'90Day',0,'90DayTS',null,'Monthly',0,'Christmas',1,'Unsubscribe',0)
+  ELSEIF @options == 5 THEN
+    UpsertData('Preferences',1,'SubscriberKey',@SubscriberKey,'EmailAddress',@EmailAddress,'AllNews',0,'90Day',0,'90DayTS',null,'Monthly',0,'Christmas',0,'Unsubscribe',1)
+  ENDIF
+
+  IF @options == 5 THEN
+    SET @lue = CreateObject("ExecuteRequest")
+    SetObjectProperty(@lue,"Name","LogUnsubEvent")
+
+    SET @lue_prop = CreateObject("APIProperty")                 
+    SetObjectProperty(@lue_prop, "Name", "SubscriberKey")
+    SetObjectProperty(@lue_prop, "Value", @SubscriberKey)
+    AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+    SET @lue_prop = CreateObject("APIProperty")
+    SetObjectProperty(@lue_prop, "Name", "JobID")
+    SetObjectProperty(@lue_prop, "Value", @JobID)
+    AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+    SET @lue_prop = CreateObject("APIProperty")
+    SetObjectProperty(@lue_prop, "Name", "Reason")
+    SetObjectProperty(@lue_prop, "Value", "Unsubscribed from Custom Preference Center")
+    AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+    SET @resp = InvokeExecute(@lue, @overallStatus, @requestId)
+
+    SET @Response = Row(@resp, 1)
+    SET @Status = Field(@Response,"StatusMessage")
+    SET @Error = Field(@Response,"ErrorCode")
+  ELSE
+    SET @Subscriber = CreateObject("Subscriber")
+    SetObjectProperty(@Subscriber, "SubscriberKey",@SubscriberKey)
+    SetObjectProperty(@Subscriber, "EmailAddress",@EmailAddress)
+    SetObjectProperty(@Subscriber, "Status", "Active")
+    SET @resp = InvokeUpdate(@Subscriber, @createErrDesc, @createErrNo, @createOpts)
+  ENDIF  
+ENDIF
+]%%
+<script runat=server>
+  Platform.Load("core", "1");
+  var subObj = Subscriber.Init(Variable.GetValue("@SubscriberKey"));
+  if(Variable.GetValue("@options") == 5){
+    subObj.Unsubscribe();
+  } else {
+    subObj.Update({"Status": "Active"});
+  }
+</script>
