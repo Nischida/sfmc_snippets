@@ -6,12 +6,15 @@ Related Bookmarks
 -----------------------
 
 Ampscript Docs
+
 https://developer.salesforce.com/docs/atlas.en-us.noversion.mc-programmatic-content.meta/mc-programmatic-content/index.htm
 
 DataViews
+
 https://help.salesforce.com/articleView?id=mc_as_data_views.htm&type=5
 
 SF StackExchange
+
 https://salesforce.stackexchange.com/
 
 Personalization Strings
