@@ -1,5 +1,5 @@
 # sfmc_snippets
-This is a collection of code related to SFMC
+This is a collection of code and resources related to SFMC
 
 
 Related Bookmarks
