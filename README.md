@@ -75,3 +75,6 @@ https://imgflip.com/i/2z7bdr
 
 DrEvil - Known Issue<br />
 https://imgflip.com/i/2w0v3d
+
+Bell - c’est la salesforce<br />
+https://imgflip.com/i/311xtn

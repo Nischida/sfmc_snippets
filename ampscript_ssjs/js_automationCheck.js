@@ -1,3 +1,5 @@
+// Plan to adjust to filter within SSJS, try to add Last Successful Run Time
+
 <script runat="server">
     Platform.Load("Core", "1")
     Platform.Function.DeleteData('automation_check', ["Lookup"], ["1"]);
