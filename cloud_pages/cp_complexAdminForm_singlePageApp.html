@@ -108,7 +108,7 @@ Admin Capabilities of this page
 
       set @CaptureDate = RequestParameter('CaptureDate')
       set @acquisition_source = 'B2B_Rep_LandingPage'
-      set @totalOptIns = DataExtensionRowCount('B2B_DOI_TSConfirmation')
+      set @totalOptIns = DataExtensionRowCount('B2B_DOI_SendLog')
 
 /*upsert data into DE*/
 if Empty(@EmailAddress) then
@@ -187,7 +187,13 @@ var @ts, @tsDef, @ts_subkey, @ts_sub, @ts_statusCode, @errorCode
    SET @tsDef = CreateObject("TriggeredSendDefinition")
    SET @ts_subkey = @EmailAddress 
 
+   if @VendorType == 'General' then
    SetObjectProperty(@tsDef, "CustomerKey", "B2B_OptInConfirmation")
+   else
+   SetObjectProperty(@tsDef, "CustomerKey", "B2B_OptInConfirmation_Promo")
+   endif
+
+
    SetObjectProperty(@ts, "TriggeredSendDefinition", @tsDef)
 
    SET @ts_sub = CreateObject("Subscriber")
