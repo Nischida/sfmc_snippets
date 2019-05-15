@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/gijgo@1.9.10/css/gijgo.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gijgo@1.9.10/js/gijgo.min.js" type="text/javascript"></script>
+    <title>Hickory Farms</title>
+
+    <style>
+      .nav-style {
+        font-size:14px;
+        color:#777777;
+        text-align: center;
+    }
+
+      .form-text {
+        font-size:12px!important;
+        color:#777777!important;
+        line-height:16px!important;
+      }
+
+      .content {
+        font-size:14px;
+        color:#777777;
+      }
+
+      .item-name {
+        font-size:14px;
+        color:#777777;
+        text-align: center;
+        line-height:16px;
+        display: block;
+
+      }
+
+       a.item-name:HOVER {
+        color:#444444;
+      }
+
+      .product-link {
+        font-size:10px;
+        color:#777777;
+        text-align:center;
+        display:block;
+      }
+
+      a.product-link:HOVER {
+        color:#444444;
+      }
+
+      .disclaimer {
+        font-size:10px;
+        color:#777777;
+      }
+
+    
+@media only screen and (max-width: 576px) { 
+  .remove-border {
+    border-right:none !important;
+    border:none !important;
+    margin:auto !important;
+  }
+
+  .nav-link {
+    text-align: center !important;
+    display:block !important;
+}
+
+.logo {
+  width:80%!important;
+}
+ }
+    </style>
+  </head>
+  <body>
+
+    %%[
+    /*ampscript for updating existing content entry*/
+    Var @giveaway_code, @giveaway_name, @giveaway_content, @giveaway_disclaimer, @alt_img, @start_date, @end_date, @default_time
+
+    set @giveaway_code = RequestParameter('giveaway_code')
+    set @giveaway_name = Lookup('socialgiveaway_landingpage_content','giveaway_name','giveaway_code',@giveaway_code)
+    set @giveaway_content = Lookup('socialgiveaway_landingpage_content','giveaway_content','giveaway_code',@giveaway_code)
+    set @giveaway_disclaimer = Lookup('socialgiveaway_landingpage_content','giveaway_disclaimer','giveaway_code',@giveaway_code)
+    set @product_sku = Lookup('socialgiveaway_landingpage_content','product_sku','giveaway_code',@giveaway_code)
+    set @alt_img = Lookup('socialgiveaway_landingpage_content','alt_img','giveaway_code',@giveaway_code)
+    set @recommended_sku_1 = Lookup('socialgiveaway_landingpage_content','prod_rec_1_sku','giveaway_code',@giveaway_code)
+    set @recommended_sku_2 = Lookup('socialgiveaway_landingpage_content','prod_rec_2_sku','giveaway_code',@giveaway_code)
+    set @recommended_sku_3 = Lookup('socialgiveaway_landingpage_content','prod_rec_3_sku','giveaway_code',@giveaway_code)
+    set @recommended_sku_4 = Lookup('socialgiveaway_landingpage_content','prod_rec_4_sku','giveaway_code',@giveaway_code)
+    set @start_date = Lookup('socialgiveaway_landingpage_content','start_date','giveaway_code',@giveaway_code)
+    set @end_date = Lookup('socialgiveaway_landingpage_content','end_date','giveaway_code',@giveaway_code)
+    set @default_time = 'Monday, January 01, 1900 12:00 AM'
+
+    if @start_date == @default_time then
+      set @start_date = formatDate(now(),'MM/DD/YYYY')
+      else
+      set @start_date = formatDate(@start_date,'MM/DD/YYYY')
+      ENDIF
+
+   
+    if @end_date == @default_time then
+      set @end_date = formatDate(now(),'MM/DD/YYYY')
+      else
+      set @end_date = formatDate(@end_date,'MM/DD/YYYY')
+      ENDIF
+
+    ]%%
+    <div class="container">
+      <div class="row pb-5">
+        <div align="center" class="col align-items-center pt-4">
+          <a href="https://www.hickoryfarms.com/home" alias=""><img src="http://image.e.hickoryfarms.com/lib/fe5a15707c610c7e7012/m/6/beff39ea-afb2-4c17-9bdf-7861bea2cae3.jpg" class="logo" width="55%"></a>
+        </div>
+      </div>
+
+    <div id="form_content" class="container mx-auto">
+      <div class="row">
+        <div class="col-md-3 offset-md-2">
+       
+        <form class="mx-auto" id="js-form" method="post" action="http://cloud.e.hickoryfarms.com/hfgiveawaycontent">
+              <div class="mx-auto form-text pb-4 pt-4">
+                  <label class="">Update Content</label><br />
+                  <input class="col-7 col-sm-8" type="text" id="giveaway_code" name="giveaway_code" placeholder="giveaway code" required="true"/>
+              </div>
+            
+              <div class="submit form-text">
+                  <input type="submit" value="Get Content"/>
+              </div>
+          </form>
+
+       <hr />
+
+        <form class="mx-auto" id="js-form" method="post" action="http://cloud.e.hickoryfarms.com/hfgiveawaycontent">
+          %%[
+          set @current_giveaway = RequestParameter('giveaway_code_winner')
+          set @giveaway_entries = LookupRows('2019_social_giveaway_master','giveaway',@current_giveaway)
+          set @rowcount = RowCount(@giveaway_entries)
+          set @random = Random(1, @rowcount)
+          set @winner = Row(@giveaway_entries, @random)
+          set @winner_email = Field(@winner, 'EmailAddress')
+          ]%%
+          <div class="mx-auto form-text pb-4 ">
+                <label class="">Pick Winner</label><br />
+                <input class="col-7 col-sm-8" type="text" id="giveaway_code_winner" name="giveaway_code_winner" placeholder="enter giveaway code" value="%%=v(current_giveaway)=%%" required="true"/>
+            </div>
+          
+            <div class="submit form-text pb-4">
+                <input type="submit" value="Pick Winner"/>
+            </div>
+        </form>
+
+        <div class="form-text">
+          %%[if EMPTY(@current_giveaway) then]%%
+          %%[else]%%
+            Winner: %%=v(@winner_email)=%% <br />
+            Giveaway: %%=v(@current_giveaway)=%%
+          %%[endif]%%
+        </div>
+
+<hr />
+
+        <form class="mx-auto" id="js-form" method="post" action="http://cloud.e.hickoryfarms.com/hfgiveawaycontent">
+          %%[
+          set @giveaway_lookup = RequestParameter('giveaway_lookup')
+          set @giveaway_code_lookup = Lookup('social_giveaway_log_filtered','giveaway','giveaway',@giveaway_lookup)
+          set @total_entries = Lookup('social_giveaway_log_filtered','total_entries','giveaway',@giveaway_lookup)
+          set @opt_ins = Lookup('social_giveaway_log_filtered','total_optin_yes','giveaway',@giveaway_lookup)
+          set @new_subs = Lookup('social_giveaway_log_filtered','total_new_subscribers','giveaway',@giveaway_lookup)
+          
+
+          ]%%
+          <div class="mx-auto form-text pb-4">
+                <label class="">Lookup Stats</label><br />
+                <input class="col-7 col-sm-8" type="text" id="giveaway_lookup" name="giveaway_lookup" placeholder="enter giveaway code" required="true"/>
+            </div>
+          
+            <div class="submit form-text pb-4">
+                <input type="submit" value="Lookup Stats"/>
+            </div>
+        </form>
+
+        <div class="form-text">
+          %%[if EMPTY(@giveaway_code_lookup) then]%%
+          %%[else]%%
+            <strong>%%=v(@giveaway_code_lookup)=%%</strong> <br />
+            Entries: %%=v(@total_entries)=%% <br />
+            Optin-Yes: %%=v(@opt_ins)=%% <br />
+            New Subs: %%=v(@new_subs)=%% 
+          %%[endif]%%
+        </div>
+
+
+
+   </div>
+
+        <div class="col-md-7 col-sm-6 offset-md-2 mx-auto">
+          <form class="mx-auto" id="js-form" method="post" action="http://cloud.e.hickoryfarms.com/hflandingpagecontentsubmit">
+              <div class="mx-auto form-text pb-4 pt-4">
+                  <label class="">Giveaway Code</label><br />
+                  <input class="col-7 col-sm-8" type="text" id="giveaway_code" value="%%=v(@giveaway_code)=%%" name="giveaway_code" placeholder="giveaway code" required="true"/>
+              </div>
+              <div class="mx-auto form-text pb-4">
+                  <label class="">Giveaway Name</label><br />
+                  <input class="col-7 col-sm-8" type="text" id="giveaway_name" value="%%=v(@giveaway_name)=%%" name="giveaway_name" placeholder="giveaway name"/>
+              </div>
+              <div class="form-text pb-4">
+                <label class="">Giveaway Content</label><br />
+                <textarea class="col-7 col-sm-8" type="textarea" id="giveaway_content" value="%%=v(@giveaway_content)=%%" name="giveaway_content" placeholder="giveaway content">%%=v(@giveaway_content)=%%</textarea>
+              </div>
+              <div class="mx-auto form-text pb-4">
+                  <label class="">Product SKU</label><br />
+                  <input class="col-7 col-sm-8" type="text" id="product_sku" value="%%=v(@product_sku)=%%" name="product_sku" placeholder="product number (full number i.e. 000026); do not include #" />
+              </div>
+              <div class="mx-auto form-text pb-4">
+                  <label class="">Alternate Product Image</label><br />
+                  <input class="col-7 col-sm-8" type="text" id="product_image_url" value="%%=v(@alt_img)=%%" name="product_image_url" placeholder="if no product image url provided; will pull from product catalog"/>
+              </div>
+              <div class="mx-auto form-text pb-4">
+                  <label class="">Recommended Product SKUs</label><br />
+                  <input class="col-4 mb-2" type="text" id="recommended_sku_1" value="%%=v(@recommended_sku_1)=%%" name="recommended_sku_1" placeholder="Rec 1 (full number i.e. 000026); do not include #" />
+                  <input class="col-4 mb-2" type="text" id="recommended_sku_2" value="%%=v(@recommended_sku_2)=%%" name="recommended_sku_2" placeholder="Rec 2 (full number i.e. 000026); do not include #" />
+                  <input class="col-4" type="text" id="recommended_sku_3" value="%%=v(@recommended_sku_3)=%%" name="recommended_sku_3" placeholder="Rec 3 (full number i.e. 000026); do not include #" />
+                  <input class="col-4" type="text" id="recommended_sku_4" value="%%=v(@recommended_sku_4)=%%" name="recommended_sku_4" placeholder="Rec 4 (full number i.e. 000026); do not include #" />
+
+              </div>
+              <div class="mx-auto form-text pb-4">
+                <label class="">Disclaimer</label><br />
+                <textarea class="col-7 col-sm-8" type="textarea" id="disclaimer" value="%%=v(@giveaway_disclaimer)=%%" name="disclaimer" placeholder="disclaimer information">%%=v(@giveaway_disclaimer)=%%</textarea>
+              </div>
+
+           
+              <div class="mx-auto form-text pb-4">
+                <label class="">Start Date</label><br />
+                <input id="datepicker" type="textarea" id="start_date" value="%%=v(@start_date)=%%" name="start_date" style="font-size:12px;" placeholder="choose your start date" required="true" width="276" />
+                <script>
+                    $('#datepicker').datepicker({
+                        uiLibrary: 'bootstrap4'
+                    });
+
+                </script>
+              </div>
+
+              <div class="mx-auto form-text pb-4">
+                <label class="">End Date</label><br />
+                <input id="datepicker2" type="textarea" id="end_date" name="end_date" value="%%=v(@end_date)=%%" style="font-size:12px;" placeholder="choose your end date" required="true" width="276" />
+                <script>
+                    $('#datepicker2').datepicker({
+                        uiLibrary: 'bootstrap4'
+                    });
+                
+                </script>
+              </div>
+              
+              <div class="submit form-text">
+                  <input type="submit" value="Submit Content"/>
+              </div>
+
+              <!-- Hidden Variables to Pass -->
+                <div class="form-group row invisible">
+                  <div class="col-sm-10">
+                    <input type="text" readonly class="form-control-plaintext" id="giveaway_id" name="giveaway_id" value="%%=v(@giveaway_id)=%%">
+                  </div>
+                </div>
+            
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+  
+
+
+</div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    
+  </body>
+</html> 

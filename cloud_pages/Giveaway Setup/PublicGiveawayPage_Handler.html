@@ -1,0 +1,244 @@
+<!doctype html>
+<html>
+<head>
+ <meta charset="utf-8">
+ <meta name="description" content="">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <title>Hickory Farms - Thank You for Entering</title>
+
+    <style>
+      .nav-style {
+        font-size:14px;
+        color:#777777;
+        text-align: center;
+    }
+
+      .form-text {
+        font-size:12px;
+        color:#777777;
+      }
+
+      .content {
+        font-size:14px;
+        color:#777777;
+      }
+
+      .item-name {
+        font-size:14px;
+        color:#777777;
+        text-align: center;
+        line-height:16px;
+        display: block;
+
+      }
+
+       a.item-name:HOVER {
+        color:#444444;
+      }
+
+      .product-link {
+        font-size:10px;
+        color:#777777;
+        text-align:center;
+        display:block;
+      }
+
+      a.product-link:HOVER {
+        color:#444444;
+      }
+
+      .disclaimer {
+        font-size:10px;
+        color:#777777;
+      }
+
+      .badge-hf {
+       background-color: #98012e;
+       color:#ffffff;
+      }
+
+      a.badge-hf:hover {
+       background-color: #98012e;
+       color:#ffffff;
+      }
+
+@media only screen and (max-width: 576px) { 
+  .remove-border {
+    border-right:none !important;
+    border:none !important;
+    margin:auto !important;
+  }
+
+  .nav-link {
+    text-align: center !important;
+    display:block !important;
+}
+
+.logo {
+  width:80%!important;
+}
+ }
+    </style>
+  </head>
+<body>
+  
+   %%[ 
+/*Get Form Details and Inserts into giveaway_master_DE*/
+      VAR @EmailAddress, @email_optin, @gc
+       set @EmailAddress = RequestParameter('EmailAddress')
+       set @email_optin = RequestParameter('email_optin')
+       set @gc = RequestParameter('giveaway_code')
+  
+/*Check if user has already entered contest*/
+    Var @entry_check
+    set @entry_check = RowCount(LookupRows('2019_social_giveaway_master','EmailAddress',@EmailAddress,'giveaway',@gc))
+
+ /*Product Rec Control*/
+   set @prod_1_sku = Lookup('socialgiveaway_landingpage_content','prod_rec_1_sku','giveaway_code',@gc)
+   set @prod_1_img = Lookup('sfcc_product_feed','image_link','id',@prod_1_sku)
+   set @prod_1_name = Lookup('sfcc_product_feed','display_name','id',@prod_1_sku)
+   set @prod_1_url = Lookup('sfcc_product_feed','link','id',@prod_1_sku)
+
+   set @prod_2_sku = Lookup('socialgiveaway_landingpage_content','prod_rec_2_sku','giveaway_code',@gc)
+   set @prod_2_img = Lookup('sfcc_product_feed','image_link','id',@prod_2_sku)
+   set @prod_2_name = Lookup('sfcc_product_feed','display_name','id',@prod_2_sku)
+   set @prod_2_url = Lookup('sfcc_product_feed','link','id',@prod_2_sku)
+
+
+   set @prod_3_sku = Lookup('socialgiveaway_landingpage_content','prod_rec_3_sku','giveaway_code',@gc)
+   set @prod_3_img = Lookup('sfcc_product_feed','image_link','id',@prod_3_sku)
+   set @prod_3_name = Lookup('sfcc_product_feed','display_name','id',@prod_3_sku)
+   set @prod_3_url = Lookup('sfcc_product_feed','link','id',@prod_3_sku)
+
+   set @prod_4_sku = Lookup('socialgiveaway_landingpage_content','prod_rec_4_sku','giveaway_code',@gc)
+   set @prod_4_img = Lookup('sfcc_product_feed','image_link','id',@prod_4_sku)
+   set @prod_4_name = Lookup('sfcc_product_feed','display_name','id',@prod_4_sku)
+   set @prod_4_url = Lookup('sfcc_product_feed','link','id',@prod_4_sku)
+
+  ]%%
+
+ 
+  
+ <div class="container">
+
+      <div class="row">
+        <div align="center" class="col align-items-center pt-4">
+          <a href="https://www.hickoryfarms.com/home" alias=""><img src="http://image.e.hickoryfarms.com/lib/fe5a15707c610c7e7012/m/6/beff39ea-afb2-4c17-9bdf-7861bea2cae3.jpg" class="logo" width="55%"></a>
+        </div>
+      </div>
+      
+      <div class="container">
+      <div class="row d-none d-lg-block">
+    <div class="col">
+       <nav class="navbar navbar-expand-md navbar-light">
+          <div align="center" class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav nav-style mx-auto">
+             <li class="nav-item pr-3 align-items-center">
+                <a class="nav-link nav-style" href="https://www.hickoryfarms.com/gifts/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-%%=v(@gc)=%%">GIFTS</a>
+              </li>
+              <li class="nav-item pr-3">
+                <a class="nav-link" href="https://www.hickoryfarms.com/meat-cheese/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-%%=v(@gc)=%%">MEAT &AMP; CHEESE</a>
+              </li>
+              <li class="nav-item pr-3">
+                <a class="nav-link" href="https://www.hickoryfarms.com/steaks/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-%%=v(@gc)=%%">STEAKS</a>
+              </li>
+              <li class="nav-item pr-3">
+                <a class="nav-link" href="https://www.hickoryfarms.com/gourmet-food/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-%%=v(@gc)=%%">GOURMET FOOD</a>
+              </li>
+              <li class="nav-item pr-3">
+                <a class="nav-link" href="https://www.hickoryfarms.com/sweets/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-%%=v(@gc)=%%">SWEETS</a>
+              </li>
+
+              <li class="nav-item pr-3">
+                <a class="nav-link" href="https://www.hickoryfarms.com/holiday/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-%%=v(@gc)=%%">HOLIDAY</a>
+              </li>
+
+              <li class="nav-item pr-3">
+                <a class="nav-link" href="https://www.hickoryfarms.com/sale/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-%%=v(@gc)=%%">SALE</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" href="https://www.hickoryfarms.com/gifts/new/?cid=organicsocial-_-facebook-_-evr19-_-contest-_-%%=v(@gc)=%%">NEW</a>
+              </li>
+            </ul>
+          </div>
+      </nav>
+      </div>
+    </div>
+  </div>
+   
+   %%[IF @entry_check >= 1 then]%%
+   <div class="container mx-auto mt-4">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h4 align="center" style="text-align:center;">
+              Looks like you've already entered this giveaway
+            </h4>
+            <br />
+            <p align="center">
+             The winner will be notified by email. Good luck! 
+            </p>
+        </div>
+      </div>
+    </div>
+   %%[ELSE]%%
+   %%[UpsertData('2019_social_giveaway_master',2,'EmailAddress',@EmailAddress,'giveaway',@gc,'email_optin',@email_optin)]%%
+   <div class="container mx-auto mt-4 mb-4">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h4 align="center" style="text-align:center;">
+              Thank you for entering
+            </h4>
+            <br />
+            <p align="center">
+             The winner will be notified by email. Good luck! 
+            </p>
+        </div>
+      </div>
+    </div>
+   %%[ENDIF]%%
+
+
+<div class="container">
+
+  <div class="row">
+    <div class="col text-center mb-3">
+      <hr />
+      <h4>While you wait, take a look at some other items you may like.</h4>
+    </div>
+  </div>
+  <div class="row pt-3 mb-5">
+   
+      <div class="col-6 col-md-3 mb-3 mb-md-4">
+        <a href="%%=v(@prod_1_url)=%%"><img src="%%=v(@prod_1_img)=%%" width="100%" class="img-fluid img-thumbnail" alt="%%=v(@prod_1_name)=%%"></a>
+        <a href="%%=v(@prod_1_url)=%%" ><h5 class="item-name pt-2">%%=v(@prod_1_name)=%%</h5></a>
+      </div>
+       <div class="col-6 col-md-3 mb-3 mb-md-4">
+        <a href="%%=v(@prod_2_url)=%%"><img src="%%=v(@prod_2_img)=%%" width="100%" class="img-fluid img-thumbnail" alt="%%=v(@prod_2_name)=%%"></a>
+        <a href="%%=v(@prod_2_url)=%%"><h5 class="item-name pt-2">%%=v(@prod_2_name)=%%</h5></a>
+      </div>
+       <div class="col-6 col-md-3 mb-3 mb-md-0">
+        <a href="%%=v(@prod_3_url)=%%"><img src="%%=v(@prod_3_img)=%%" width="100%" class="img-fluid img-thumbnail" alt="%%=v(@prod_3_name)=%%"></a>
+        <a href="%%=v(@prod_3_url)=%%"  ><h5 class="item-name pt-2">%%=v(@prod_3_name)=%%</h5></a>
+      </div>
+      <div class="col-6 col-md-3 mb-3 mb-md-0">
+        <a href="%%=v(@prod_4_url)=%%"><img src="%%=v(@prod_4_img)=%%" width="100%" class="img-fluid img-thumbnail" alt="%%=v(@prod_4_name)=%%"></a>
+        <a href="%%=v(@prod_4_url)=%%" ><h5 class="item-name pt-2">%%=v(@prod_4_name)=%%</h5></a>
+      </div>
+    
+  </div>
+</div>
+ 
+<div class="container mx-auto mt-4 mb-4">
+      <div class="row justify-content-center">
+        <div class="col-md-8" align="center">
+          <a align="center" href="https://www.hickoryfarms.com/home" class="badge badge-pill badge-hf p-3"><h6>Visit Hickory Farms</h></a>
+        </div>
+      </div>
+    </div>
+       
+</body>
+</html>
