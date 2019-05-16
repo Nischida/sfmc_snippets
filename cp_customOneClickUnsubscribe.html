@@ -1,0 +1,281 @@
+<!-- custom one click unsub -->
+
+%%[
+VAR @PreferenceRows,@SubscriberRows
+/*SET @SubscriberID = RequestParameter('sid')*/
+SET @SubscriberKey = RequestParameter('sk')
+SET @JobID = RequestParameter('j')
+SET @options = RequestParameter('opt')
+SET @SubscriberRows = LookupRows('_Subscribers','SubscriberKey',@SubscriberKey)
+
+IF RowCount(@SubscriberRows) > 0 THEN
+  IF Empty(@SubscriberKey) then
+
+  else
+    SET @options = 5
+    SET @lue = CreateObject("ExecuteRequest")
+    SetObjectProperty(@lue,"Name","LogUnsubEvent")
+
+    SET @lue_prop = CreateObject("APIProperty")                 
+    SetObjectProperty(@lue_prop, "Name", "SubscriberKey")
+    SetObjectProperty(@lue_prop, "Value", @SubscriberKey)
+    AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+    SET @lue_prop = CreateObject("APIProperty")
+    SetObjectProperty(@lue_prop, "Name", "JobID")
+    SetObjectProperty(@lue_prop, "Value", @JobID)
+    AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+    SET @lue_prop = CreateObject("APIProperty")
+    SetObjectProperty(@lue_prop, "Name", "Reason")
+    SetObjectProperty(@lue_prop, "Value", "Unsubscribed from Custom Preference Center")
+    AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+    SET @resp = InvokeExecute(@lue, @overallStatus, @requestId)
+
+    SET @Response = Row(@resp, 1)
+    SET @Status = Field(@Response,"StatusMessage")
+    SET @Error = Field(@Response,"ErrorCode")
+  ENDIF  
+ENDIF
+]%%
+<script runat=server>
+  Platform.Load("core", "1");
+  var subObj = Subscriber.Init(Variable.GetValue("@SubscriberKey"));
+  if(Variable.GetValue("@options") == 5){
+    subObj.Unsubscribe();
+  } else {
+    subObj.Update({"Status": "Active"});
+  }
+</script>
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="https://www.hickoryfarms.com/favicon.ico" type="image/x-icon">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script>var s = %%=v(@options)=%%;</script>
+    <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+    <title>Hickory Farms</title>
+    <style>
+    body{
+      color:#434343;
+      font-family: 'Work Sans', sans-serif;
+    }
+    .body-copy{
+      margin-top:5rem;
+      text-align:center;
+    }
+    .mast{margin-top:1.5rem;}
+    .nav-cell{text-align:center; margin: 0 auto; }
+    .nav-table{
+      margin:0 auto;
+      margin-top:2rem;
+      margin-bottom:2rem;
+    }
+    .nav-table tbody tr td{
+      font-size:14px;
+      padding:0 2rem;
+      margin:0 0.2rem;
+      border-right:1px solid #D3D3D3;
+    }
+    .nav-table tbody tr td a{font-size:12px;text-decoration:none;color:#444;}
+    .nav-table tbody tr td a:hover{
+      color:#98002d;
+      border-bottom:3px solid #98002d;}
+    .nav-table tbody tr td:last-child{border-right:0;}
+    .logo{text-align:center;}
+    .sub-headline{margin-top:2rem;}
+    .form-check{margin-bottom:1rem;}
+    .spacer{
+      display:inline-block;
+      width:1rem;
+    }
+    .std-spacing{
+      margin-top:2rem;
+    }
+    .letter,label{
+      font-style: italic;
+      font-family: Georgia,serif;
+      font-size:1rem;
+    }
+    .l{
+      color:#434343;text-decoration:none;
+      border-bottom:1px solid #434343;
+      padding-bottom:1px;
+    }
+    .l:hover{
+      text-decoration:none;
+      color:#434343;
+    }
+    .btn-primary{
+      padding: 0.5rem 2.2rem;
+      border-radius: 2rem;
+    }
+    .btn-primary,.btn-primary:hover,.btn-primary:not(:disabled):not(.disabled):active{
+      background-color:#902;
+      border-color:#902;
+    }
+    .btn-primary:not(:disabled):not(.disabled):active:focus,.btn-primary:focus,.btn:focus{
+      box-shadow:0 0 0 0.2rem rgba(0,123,255,0);
+    }
+    h2{font-weight:700;}
+    input:checked{
+      background-color:#902 !important;
+    }
+    [type="radio"]:checked,
+    [type="radio"]:not(:checked) {
+        position: absolute;
+        left: -9999px;
+    }
+    [type="radio"]:checked + label,
+    [type="radio"]:not(:checked) + label
+    {
+        position: relative;
+        padding-left: 28px;
+        cursor: pointer;
+        line-height: 20px;
+        display: inline-block;
+        color: #434343;
+    }
+    [type="radio"]:checked + label:before,
+    [type="radio"]:not(:checked) + label:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 18px;
+        height: 18px;
+        border: 1.5px solid #8C8C8C;
+        border-radius: 100%;
+        background: #fff;
+    }
+    [type="radio"]:checked + label:after,
+    [type="radio"]:not(:checked) + label:after {
+        content: '';
+        width: 10px;
+        height: 10px;
+        background: #000000;
+        position: absolute;
+        top: 3.5px;
+        left: 4px;
+        border-radius: 100%;
+        -webkit-transition: all 0.2s ease;
+        transition: all 0.2s ease;
+    }
+    [type="radio"]:not(:checked) + label:after {
+        opacity: 0;
+        -webkit-transform: scale(0);
+        transform: scale(0);
+    }
+    [type="radio"]:checked + label:after {
+        opacity: 1;
+        -webkit-transform: scale(1);
+        transform: scale(1);
+    }
+    .responsive-nav{
+      display:none;
+    }
+    .responsive-nav-mobile{
+      display:block;
+    }
+    img{max-width:100%;}
+    @media (min-width: 1200px){
+  
+      .container {
+          max-width: 927px;
+      }
+    }
+    @media (min-width: 900px){
+  
+      .responsive-nav{
+        display:block;
+      }
+      .responsive-nav-mobile{
+        display:none;
+      }
+    }
+    </style>
+  </head>
+  <body>
+    <div class="container mast">
+      <div class="row">
+        <div class="col-10 offset-1 col-sm-8 offset-sm-2 logo">
+         <img src="http://image.e.hickoryfarms.com/lib/fe5a15707c610c7e7012/m/6/beff39ea-afb2-4c17-9bdf-7861bea2cae3.jpg" width="100%">
+        </div>
+      </div>
+    </div>
+    <div class="container mast-nav responsive-nav">
+      <table class="nav-table">
+        <tbody>
+          <tr>
+            <td><a href="https://www.hickoryfarms.com/gifts/?cid=Email-_-newsletter-_-EVR19-_-Nav1-_-HPRFCTR1019-_-&src=HPRFCTR0119A">GIFTS</a></td>
+            <td><a href="https://www.hickoryfarms.com/meat-cheese/?cid=Email-_-newsletter-_-EVR19-_-Nav2-_-HPRFCTR1018-_-&src=HPRFCTR1018A">MEAT & CHEESE</a></td>
+            <td><a href="https://www.hickoryfarms.com/steaks/?cid=Email-_-newsletter-_-EVR19-_-Nav3-_-HPRFCTR1019-_-&src=HPRFCTR0119A">STEAKS</a></td>
+            <td><a href="https://www.hickoryfarms.com/gourmet-food/?cid=Email-_-newsletter-_-EVR19-_-Nav4-_-HPRFCTR1019-_-&src=HPRFCTR0119A">GOURMET FOOD</a></td>
+            <td><a href="https://www.hickoryfarms.com/sweets/?cid=Email-_-newsletter-_-EVR19-_-Nav5-_-HPRFCTR1019-_-&src=HPRFCTR0119A">SWEETS</a></td>
+            <td><a href="https://www.hickoryfarms.com/holiday/?cid=Email-_-newsletter-_-EVR19-_-Nav6-_-HPRFCTR1019-_-&src=HPRFCTR0119A">HOLIDAY</a></td>
+            <td><a href="https://www.hickoryfarms.com/sale/?cid=Email-_-newsletter-_-EVR19-_-Nav7-_-HPRFCTR1019-_-&src=HPRFCTR0119A">SALE</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="container mast-nav responsive-nav-mobile">
+      <table class="nav-table">
+        <tbody>
+          <tr>
+            <td><a href="https://www.hickoryfarms.com/meat-cheese/?cid=Email-_-newsletter-_-EVR19-_-Nav2-_-HPRFCTR1019-_-&src=HPRFCTR0119A">MEAT & CHEESE</a></td>
+            <td><a href="https://www.hickoryfarms.com/holiday/?cid=Email-_-newsletter-_-EVR19-_-Nav6-_-HPRFCTR1019-_-&src=HPRFCTR0119A">HOLIDAY</a></td>
+            <td><a href="https://www.hickoryfarms.com/sale/?cid=Email-_-newsletter-_-EVR19-_-Nav7-_-HPRFCTR1019-_-&src=HPRFCTR0119A">SALE</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!--
+    <div class="container mast-nav">
+      <div class="row">
+        <div class="col nav-cell">
+          GIFTS
+        </div>
+        <div class="col nav-cell">
+          MEAT & CHEESE
+        </div>
+        <div class="col nav-cell">
+          STEAKS
+        </div>
+        <div class="col nav-cell">
+          GOURMET FOOD
+        </div>
+        <div class="col nav-cell">
+          SWEETS
+        </div>
+        <div class="col nav-cell">
+          HOLIDAY
+        </div>
+        <div class="col nav-cell">
+          SALE
+        </div>
+      </div>
+    </div>
+    -->
+    <div class="container body-copy">
+      <div class="row">
+        <div class="col-12">
+          <h2>Thank you!</h2>
+          <p class="sub-headline">
+            <b>These changes may take up to 24 hours to occur.</b>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  </body>
+</html>
