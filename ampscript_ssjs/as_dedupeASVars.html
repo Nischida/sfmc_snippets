@@ -1,0 +1,25 @@
+%%[
+set @tempString = "Jeff,Jimmy,Johnny,Jenny,Joey,Jimmy,Jenny,Jackie"
+set @rows = BuildRowSetFromString(@tempString,",")
+
+set @row_count = RowCount(@rows)
+set @previousvalues = "|"
+
+for @i = 1 TO @row_count DO
+set @row = Row(@rows, @i)
+set @Name = Field(@row, '1')
+
+set @dupCheckValue = CONCAT("|",@Name,"|")
+set @dupe = IIF(IndexOf(@previousvalues, @dupCheckValue)>0,1,0)
+
+if @dupe == 0 then
+set @previousvalues = CONCAT(@previousvalues, @Name, "|")
+
+	output(concat("<br />", @Name))
+
+endif
+
+set @previousvalues = CONCAT(@previousvalues, @Name, "|")
+
+next @i
+]%%
