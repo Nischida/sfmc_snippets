@@ -1,0 +1,61 @@
+%%[
+SET @retrieveAllDEs = CreateObject('RetrieveRequest')
+SetObjectProperty(@retrieveAllDEs, "ObjectType", "DataExtension")
+SET @filterForDEs = CreateObject("SimpleFilterPart")
+SetObjectProperty(@filterForDEs, "Property", "isSendable")
+SetObjectProperty(@filterForDEs, "SimpleOperator", "Equals")
+AddObjectArrayItem(@filterForDEs, "Value", "False")
+AddObjectArrayItem(@retrieveAllDEs,"Properties","Name")
+AddObjectArrayItem(@retrieveAllDEs,"Properties","CustomerKey")
+AddObjectArrayItem(@retrieveAllDEs,"Properties","Description")
+AddObjectArrayItem(@retrieveAllDEs,"Properties","CreatedDate")
+AddObjectArrayItem(@retrieveAllDEs,"Properties","DataRetentionPeriod")
+AddObjectArrayItem(@retrieveAllDEs,"Properties","DataRetentionPeriodLength")
+SetObjectProperty(@retrieveAllDEs, "Filter", @filterForDEs)
+SET @DERows = InvokeRetrieve(@retrieveAllDEs,@status,@reqID) 
+SET @DECount = ROWCOUNT(@DERows)
+IF @DECount > 0 THEN
+FOR @LoopdeeLoop = 1 to @DECount DO
+SET @DERow = ROW(@DERows,@LoopdeeLoop)
+SET @DEName = FIELD(@DERow,'Name')
+SET @DEKey = FIELD(@DERow,'CustomerKey')
+SET @DEDesc = FIELD(@DERow,'Description')
+SET @DECreated = FIELD(@DERow,'CreatedDate')
+SET @DERetentionPeriod = FIELD(@DERow,'DataRetentionPeriod')
+SET @DERetentionPeriodLength = FIELD(@DERow,'DataRetentionPeriodLength')
+]%%
+%%=V(@DEName)=%% - %%=V(@DEKey)=%% - %%=V(@DEDesc)=%% - %%=V(@DECreated)=%%<br><br>
+%%[ NEXT @LoopdeeLoop ELSE ENDIF ]%%
+%%=V(@status)=%%<br>
+%%=V(@reqID)=%%
+This will just show all of your non-sendable DEs in a cloudpage
+This secondary element will pull all of the fields of the DE that's in the DEKey variable, most orgs should have IGO_PROFILES (hopefully) so you'll be able to test it out at least.
+%%[
+SET @DEKey = "IGO_PROFILES"
+SET @retrieveAllDEs = CreateObject('RetrieveRequest')
+SetObjectProperty(@retrieveAllDEs, "ObjectType", "DataExtensionField")
+SET @filterForDEs = CreateObject("SimpleFilterPart")
+SetObjectProperty(@filterForDEs, "Property", "DataExtension.CustomerKey")
+SetObjectProperty(@filterForDEs, "SimpleOperator", "Equals")
+AddObjectArrayItem(@filterForDEs, "Value", @DEKey)
+AddObjectArrayItem(@retrieveAllDEs,"Properties","Name")
+AddObjectArrayItem(@retrieveAllDEs,"Properties","CustomerKey")
+AddObjectArrayItem(@retrieveAllDEs,"Properties","CreatedDate")
+AddObjectArrayItem(@retrieveAllDEs,"Properties","FieldType")
+AddObjectArrayItem(@retrieveAllDEs,"Properties","IsRequired")
+SetObjectProperty(@retrieveAllDEs, "Filter", @filterForDEs)
+SET @DEFieldRows = InvokeRetrieve(@retrieveAllDEs,@status,@reqID) 
+SET @DEFieldRowcount = ROWCOUNT(@DEFieldRows)
+]%%
+%%=V(@status)=%% - %%=V(@reqID)=%% - %%=V(@DEFieldRowcount)=%% <br>
+%%[
+IF @DEFieldRowcount > 0 THEN
+FOR @SuperLooper = 1 to @DEFieldRowcount DO
+SET @DEFieldRow = ROW(@DEFieldRows,@SuperLooper)
+SET @DEFieldKey = FIELD(@DEFieldRow,'CustomerKey')
+SET @DEFieldName = FIELD(@DEFieldRow,'Name')
+SET @DEFieldType = FIELD(@DEFieldRow,'FieldType')
+SET @DEFieldRequired = FIELD(@DEFieldRow,'IsRequired')
+]%%
+%%=V(@DEName)=%% - %%=V(@DEFieldKey)=%% - %%=V(@DEFieldName)=%% - %%=V(@DEFieldType)=%%<br>
+%%[ NEXT @SuperLooper ELSE ENDIF ]%%

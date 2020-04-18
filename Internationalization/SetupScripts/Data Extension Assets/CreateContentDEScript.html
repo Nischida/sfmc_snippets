@@ -1,0 +1,138 @@
+<script runat="server">
+Platform.Load("core","1");
+try{
+var folderName = Platform.Request.GetFormField('folderName');
+// var parentID = Variable.Get('@rootFolder');
+var parentID = 1234;
+var description = "Email content for " + folderName + " emails.";
+var custKeyGUID = Platform.Function.GUID();
+
+//Create Subfolder
+var newFolder = {
+    "Name" : folderName,
+    "CustomerKey" : custKeyGUID,
+    "Description" : description,
+    "ContentType" : "DataExtension",
+    "IsActive" : "true",
+    "IsEditable" : "true",
+    "AllowChildren" : "true",
+    "ParentFolderID" : parentID
+};
+var status = Folder.Add(newFolder);
+
+// Get Subfolder Category ID
+var folderProx = new Script.Util.WSProxy();
+var cols = ["Name","ID"];
+var filter = {
+    LeftOperand:{ 
+    Property: "Name",
+    SimpleOperator: "equals",
+    Value: folderName
+    },
+    LogicalOperator: "AND",
+    RightOperand: {
+    Property: "ParentFolder.ID",
+    SimpleOperator: "equals",
+    Value: parentID
+  }
+};
+
+var folderData = folderProx.retrieve("DataFolder", cols, filter);
+var categoryID = folderData.Results[0].ID;
+
+
+// Create STG and PROD Data Extensions in Subfolder
+for(i = 1; i < 2; i++){
+var prox = new Script.Util.WSProxy();
+var stgGuid = Platform.Function.GUID();
+var prodGuid = Platform.Function.GUID();
+
+
+
+// Sets Data Extension Identifiers
+ if(i == 1){
+ var stgTag = "_ROM_STG"
+ var prodTag = "_ROM_PROD"
+ } else if(i == 2){
+ var stgTag = "_SYM_STG"
+ var prodTag = "_SYM_PROD"
+ }
+
+
+
+// Create Data Extensions with Primary Key/Standard fields
+var de_STG = {
+    Name: folderName + stgTag,
+    CustomerKey: stgGuid,
+    Description: description,
+    Fields: [
+      {FieldType: "Boolean", Name: "approved", IsPrimaryKey: false, IsNillable: true, IsRequired: false, DefaultValue: false},
+      {FieldType: "Text",Name: "emailname",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
+      {FieldType: "Text",Name: "lang_region",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
+      {FieldType: "Text",Name: "subject",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "preheader",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
+    ],
+    CategoryID: categoryID
+};
+
+var de_PROD = {
+    Name: folderName + prodTag,
+    CustomerKey: prodGuid,
+    Description: description,
+    Fields: [
+      {FieldType: "Boolean",Name: "approved",IsPrimaryKey: false,IsNillable: true,IsRequired: false,DefaultValue: false},
+      {FieldType: "Text",Name: "emailname",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
+      {FieldType: "Text",Name: "lang_region",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
+      {FieldType: "Text",Name: "subject",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "preheader",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
+    ],
+    CategoryID: categoryID
+
+};
+
+var res = prox.createBatch("DataExtension", [de_STG, de_PROD]);
+
+
+// Update Data Extensions with content fields. This is a loop so each section is the same with an auto increment identifier. Change 'y < 26' to the amount of sections that are needed.
+for(y = 1; y < 26; y++){
+    var updateProx = new Script.Util.WSProxy();    
+
+    var newSTGFields = [
+      {FieldType: "Text",Name: "headline_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "subheadline_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "copy_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "cta_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "imgsrc_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "alttext_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
+    ];
+  
+    var newPRODFields = [
+    {FieldType: "Text",Name: "headline_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "subheadline_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "copy_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "cta_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "imgsrc_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
+      {FieldType: "Text",Name: "alttext_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
+    ];
+  
+   var stgProps = { 
+        CustomerKey: stgGuid,
+        Fields: newSTGFields 
+    };
+
+    var prodProps = { 
+        CustomerKey: prodGuid,
+        Fields: newPRODFields 
+    };
+    
+    var stgData = updateProx.updateItem("DataExtension", stgProps);
+    var prodData = updateProx.updateItem("DataExtension", prodProps);
+  };
+};
+
+var actionURL = Variable.Get('@actionURL')
+
+} catch(e) {
+  stringify(e);
+}
+</script>

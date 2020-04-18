@@ -1,0 +1,102 @@
+%%[
+set @url = 'https://mccsjpjp6wrxv5-jt2j2chwz4rcq.auth.marketingcloudapis.com/v2/token'
+set @auth = '{"grant_type":"client_credentials","client_id":"wzun6dfnmth3gdwktd5xmjz3","client_secret":"e6QRuHBbcbTsKWIEPtk4gabf"}'
+set @returnCode = HTTPPOST(@url,"application/json",@auth,@response)
+
+
+IF @returnCode ==  200 THEN
+   set @regex = '^{"access_token":"(.*?)",'
+   set @accessToken = REGEXMATCH(@response,@regex,1,"Multiline")
+ELSE
+ENDIF
+]%%
+
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>TLI Emails in a Journey</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+ </head>
+ <body>
+  
+
+ 
+ 
+
+<div class="container">
+ <div class="row d-flex justify-content-center">
+  <div class="col-10 mb-5">
+  <div class="card-body">
+   <h1>What emails are in:</h1>
+   <form action="https://cloud.email.smiledirectclub.com/JourneyEmailFinder" method="post">
+        <div class="form-row">
+        <div class="col-10">
+          <input type="text" name="jName" class="form-control" placeholder="Journey Name">
+        </div>
+    </div>
+   </form>
+     </div>
+ </div>
+ </div>
+</div>
+
+
+%%[
+if EMPTY(RequestParameter('jName')) then
+else
+]%%
+<div class="container">
+ <div class="row d-flex justify-content-center">
+  <div class="col-10 mb-5">
+  <div class="card-body">
+   <script runat=server>
+Platform.Load("core", "1.1.1");
+
+var jName = Platform.Request.GetFormField("jName");
+
+var accessToken = Variable.GetValue("@accessToken")  
+var auth = 'Bearer ' + accessToken;
+
+
+var intURL = 'https://mccsjpjp6wrxv5-jt2j2chwz4rcq.rest.marketingcloudapis.com/interaction/v1/interactions?nameOrDescription=' + jName
+var rr1 = Platform.Function.HTTPGet(intURL ,false,0,['Authorization'],[auth],status);
+var resp1 = Platform.Function.ParseJSON(rr1);
+var jID = resp1.items[0].id
+
+var url = 'https://mccsjpjp6wrxv5-jt2j2chwz4rcq.rest.marketingcloudapis.com/interaction/v1/interactions/' + jID
+var result = Platform.Function.HTTPGet(url ,false,0,['Authorization'],[auth],status);
+var response = Platform.Function.ParseJSON(result);
+
+
+
+
+ for(var i = 0; i < response.activities.length; i++){
+
+ if(response.activities[i].type == 'EMAILV2'){
+   Platform.Response.Write(response.activities[i].name + "<br />"); 
+  }
+   };
+     
+ </script>
+     </div>
+ </div>
+ </div>
+</div>
+
+
+
+
+%%[endif]%%
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+ </body>
+</html>

@@ -1,0 +1,163 @@
+<script runat="server">
+Platform.Load("Core","1.1.1");
+
+var deName = 'INT_EmailDiscovery_07';
+var ID = Platform.Request.GetFormField('ID');
+
+
+//Get Email Data from Content DE
+function getEmails(deName){       
+    var prox = new Script.Util.WSProxy();
+    var cols = ['Name','CustomerKey'];
+    var filter = {
+        Property: 'Name',
+        SimpleOperator: 'equals',
+        Value: deName
+    };
+    var desc = prox.retrieve('DataExtension', cols, filter);
+    var dekey = desc.Results[0].CustomerKey;
+
+    var deLookup = DataExtension.Init(dekey);
+    var emailRows = deLookup.Rows.Retrieve();
+
+
+    var html = "";
+    html += "<select name='ID'>";
+        for(var e = 0; e < emailRows.length; e++){
+          var ID = emailRows[e].ID;
+            html += "<option value='" + emailRows[e].ID + "'>" + emailRows[e].Name + "</option>";  
+        };
+    html += "</select>";
+
+
+
+
+    Write(html);
+};
+  
+
+function getHTML(deName, ID){
+  var HTML = Platform.Function.Lookup(deName,'HTML',['ID'],[ID]);
+
+  Write(HTML);
+}
+
+
+</script>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Page Title</title>
+  
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>tinymce.init({
+    selector:'textarea',
+    plugins: "code",
+    toolbar: "code",
+    menubar: "tools"});</script>
+
+  </head>
+  <body>
+    <div class="container-fluid mt-5">
+      <div class="row">
+        <div class="col-8">
+        <form method="post" action="https://pub.s6.exacttarget.com/ymsfapfz0o0">
+       
+            <script runat=server>
+              if(deName){getEmails(deName);}
+            </script>
+
+            <button class='btn-sm btn-info' value=''>Get HTML</button>
+        </form>
+        <form>
+          <div class="form-group row">
+            <div class="col-sm-10" height="750">
+              <textarea id="html" v-model="html" style="height:750px;" type="textarea" class="form-control" id="inputEmail3" height="750" placeholder="html">
+                <script runat=server>
+                if(ID){getHTML(deName,ID);}
+                </script>
+              </textarea>
+            </div>
+          </div>
+          
+        </form>
+
+        </div>
+
+        <div class="col-3">
+          <form id="inputForm">
+            
+            <div class="form-group row">
+              <label for="inputEmail3" class="col-sm-2 form-control-label">Email</label>
+              <div class="col-sm-10">
+                <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="inputPassword3" class="col-sm-2 form-control-label">Password</label>
+              <div class="col-sm-10">
+                <input type="password" class="form-control" id="inputPassword3" placeholder="Email">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2">Radios</label>
+              <div class="col-sm-10">
+                <div class="radio">
+                  <label>
+                    <input type="radio" name="gridRadios" id="gridRadios1" value="option1" checked>
+                    Option one is this and that&mdash;be sure to include why it's great
+                  </label>
+                </div>
+                <div class="radio">
+                  <label>
+                    <input type="radio" name="gridRadios" id="gridRadios1" value="option1">
+                    Option one is this and that&mdash;be sure to include why it's great
+                  </label>
+                </div>
+                <div class="radio disabled">
+                  <label>
+                    <input type="radio" name="gridRadios" id="gridRadios1" value="option1" disabled>
+                    Option one is this and that&mdash;be sure to include why it's great
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-2">Checkbox</label>
+              <div class="col-sm-10">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox"> Check me out
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-secondary">Sign in</button>
+              </div>
+            </div>
+          </form>
+  
+        </div>
+
+      </div>
+    </div>
+
+
+
+
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script></body>
+</html> 

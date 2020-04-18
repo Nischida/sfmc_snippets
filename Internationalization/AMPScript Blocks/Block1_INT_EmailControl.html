@@ -1,0 +1,32 @@
+***INT_EmailControl_AMPScript***
+
+%%[
+/*
+**Controls Email Name Variables for lookups**
+Needs to be set as it appears in the Email_Catalog and corresponding Content Data Extensions
+
+**Controls Prod/STG Content DE Selection**
+@is_stg == '' (pulls from Prod DEs)
+@is_stg == 'N' (pulls from Prod DEs)
+@is_stg == 'Y' (pulls from STG DEs)
+
+**Controls Prod/Dev AMPScript blocks for LanguageContentLookup and INT_Dictionary**
+@is_dev == '' (pulls from Prod AMPScript blocks)
+@is_dev == 'N' (pulls from Prod AMPScript blocks)
+@is_dev == 'Y' (pulls from STG AMPScript blocks)
+
+**Controls Prod/Dev AMPScript blocks for Footer**
+@is_footerDev == '' (pulls from Prod AMPScript blocks)
+@is_footerDev == 'N' (pulls from Prod AMPScript blocks)
+@is_footerDev == 'Y' (pulls from STG AMPScript blocks)
+*/
+
+/*Set ContentBlockID for core PKG*/
+set @INT_AMPScript_Core_PKG = Lookup('INT_AMPScriptCatalog','ID','AssetName','INT_AMPScript_Core_PKG')
+
+
+set @emailname = 'TLI_TestEmail'
+set @is_stg = 'N'
+set @is_dev = 'N'
+set @is_footerDev = 'N'
+]%%

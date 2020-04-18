@@ -1,0 +1,42 @@
+    "GetEmailPreviewByID": {
+            "path": "emails/{id}/preview",
+            "httpMethod": "post",
+            "description": "Get a preview for an email by id.",
+            "parameters": {}
+        },
+        "GetEmailPreviewByIDWithContact": {
+            "path": "emails/{id}/contacts/{cid}/preview",
+            "httpMethod": "post",
+            "description": "Get a preview for an email by id using a specific contact.",
+            "parameters": {}
+        },
+        "GetEmailPreviewByIDWithList": {
+            "path": "emails/{id}/lists/{lid}/preview",
+            "httpMethod": "post",
+            "description": "Get a preview for an email by id using a specific list.",
+            "parameters": {}
+        },
+        "GetEmailPreviewByIDWithListAndContact": {
+            "path": "emails/{id}/lists/{lid}/contacts/{cid}/preview",
+            "httpMethod": "post",
+            "description": "Get a preview for an email by id using a specific list and contact.",
+            "parameters": {}
+        },
+        "GetEmailPreviewByIDWithDataExtensionAndContact": {
+            "path": "emails/{id}/dataExtension/{deid}/contacts/{cid}/preview",
+            "httpMethod": "post",
+            "description": "Get a preview for an email by id using a specific data extension and contact.",
+            "parameters": {}
+        },
+        "GetEmailPreviewByIDWithDataExtensionAndRow": {
+            "path": "emails/{id}/dataExtension/{deid}/row/{rowId}/preview",
+            "httpMethod": "post",
+            "description": "Get a preview for an email by id using a specific data extension and data extension row.",
+            "parameters": {}
+        },
+        "PostEmailPreviewSend": {
+            "path": "emails/preview/send",
+            "httpMethod": "post",
+            "description": "Sends a preview of an email.",
+            "parameters": {}
+        },

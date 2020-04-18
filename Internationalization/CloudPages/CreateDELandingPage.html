@@ -1,0 +1,353 @@
+
+%%[
+
+set @actionURL =''
+
+]%%
+
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Create Data Extensions</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+
+  <style>
+   body {
+    color:#444444;
+   }
+
+ h1 {
+  text-decoration: underline;
+  font-weight:300;
+  font-size:20px;
+  color:#444444;
+  padding-bottom:.5em;
+
+ }
+
+ h2 {
+  font-weight:200;
+  font-size:16px;
+  color:#444444;
+  padding-bottom:.5em;
+ }
+
+  </style>
+ </head>
+ <body>
+
+  <div class="container">
+   <div class="row">
+    <div class="col-7">
+     <div class="card mt-5">
+       <div class="card-body">
+        <h1>Create New Content Data Extensions</h1>
+        <h2>Please enter the name that will be associated with this content data extension.</h2>
+           <form action="%%=RedirectTo(@actionURL)=%%" method="post">
+             <div class="form-row">
+               <div class="form-group col">
+                 <input type="text" class="form-control form-control-sm mb-3" name="streamName" id="streamName" placeholder="Stream Name">
+                 <input type="text" class="form-control form-control-sm mb-3" name="attempt" id="attempt" placeholder="Attempt Var for Testing">
+                <input type="hidden" name="createDE" id="createDE" value="createDE"/>
+               </div>
+           </div>
+            <div class=" form-control border-0 d-flex justify-content-end ">
+           <button type="submit" class="btn btn-info">Next&nbsp;&nbsp;&gt;</button>
+          </div>
+         </form>
+       </div>
+     </div>
+    </div>
+   </div>
+  </div>
+
+%%[if Empty(RequestParameter('streamName')) then else]%%
+
+<script runat=server>
+Platform.Load("Core","1.1.1");
+
+try {
+var streamName = Platform.Request.GetFormField('streamName');
+var attempt = Platform.Request.GetFormField('attempt');
+
+var parentFolderName = 'INT_DataExtensions' + attempt;
+var contentFolderName = 'Content Data Extensions' + attempt;
+var contentSubFolderName = streamName + attempt;
+var contentPRODFolderName = streamName + '_PROD Content' + attempt;
+var contentSTGFolderName = streamName + '_STG Content' + attempt;
+
+
+//Get Root Folder ID
+var folderProx = new Script.Util.WSProxy();
+var cols = ["Name","ID"];
+var filter = {Property:"Name",SimpleOperator:"equals",Value:"Data Extensions"};
+
+var folderData = folderProx.retrieve("DataFolder", cols, filter);
+var rootID = folderData.Results[0].ID;
+
+
+//Get Parent Folder ID
+var folderProx = new Script.Util.WSProxy();
+var cols = ["Name","ID"];
+var filter = {
+    LeftOperand:{ 
+    Property: "Name",
+    SimpleOperator: "equals",
+    Value: parentFolderName
+    },
+    LogicalOperator: "AND",
+    RightOperand: {
+    Property: "ParentFolder.ID",
+    SimpleOperator: "equals",
+    Value: rootID
+  }
+};
+
+var folderData = folderProx.retrieve("DataFolder", cols, filter);
+var parentFolderID = folderData.Results[0].ID;
+
+
+//Get Content Folder ID
+var folderProx = new Script.Util.WSProxy();
+var cols = ["Name","ID"];
+var filter = {
+    LeftOperand:{ 
+    Property: "Name",
+    SimpleOperator: "equals",
+    Value: contentFolderName
+    },
+    LogicalOperator: "AND",
+    RightOperand: {
+    Property: "ParentFolder.ID",
+    SimpleOperator: "equals",
+    Value: parentFolderID
+  }
+};
+
+
+var folderData = folderProx.retrieve("DataFolder", cols, filter);
+var contentFolderID = folderData.Results[0].ID;
+
+
+
+//Create Stream Content Folder
+var description = "Content DEs Folder" + descriptionCopy;
+var deGUID = Platform.Function.GUID();  
+
+var newFolder = {
+    "Name" : contentSubFolderName,
+    "CustomerKey" : deGUID,
+    "Description" : description,
+    "ContentType" : "DataExtension",
+    "IsActive" : "true",
+    "IsEditable" : "true",
+    "AllowChildren" : "true",
+    "ParentFolderID" : contentFolderID
+};
+
+var status = Folder.Add(newFolder);
+
+
+//Get Stream Content Folder ID
+var folderProx = new Script.Util.WSProxy();
+var cols = ["Name","ID"];
+var filter = {
+    LeftOperand:{ 
+    Property: "Name",
+    SimpleOperator: "equals",
+    Value: contentSubFolderName
+    },
+    LogicalOperator: "AND",
+    RightOperand: {
+    Property: "ParentFolder.ID",
+    SimpleOperator: "equals",
+    Value: contentFolderID
+  }
+};
+
+
+var folderData = folderProx.retrieve("DataFolder", cols, filter);
+var contentSubFolderID = folderData.Results[0].ID;
+
+
+//Create Stream Prod Content Folder
+var description = "Content DEs Folder" + descriptionCopy;
+var deGUID = Platform.Function.GUID();  
+
+var newFolder = {
+    "Name" : contentPRODFolderName,
+    "CustomerKey" : deGUID,
+    "Description" : description,
+    "ContentType" : "DataExtension",
+    "IsActive" : "true",
+    "IsEditable" : "true",
+    "AllowChildren" : "true",
+    "ParentFolderID" : contentSubFolderID
+};
+
+var status = Folder.Add(newFolder);
+
+
+//Get Stream Prod Content Folder ID
+var folderProx = new Script.Util.WSProxy();
+var cols = ["Name","ID"];
+var filter = {
+    LeftOperand:{ 
+    Property: "Name",
+    SimpleOperator: "equals",
+    Value: contentPRODFolderName
+    },
+    LogicalOperator: "AND",
+    RightOperand: {
+    Property: "ParentFolder.ID",
+    SimpleOperator: "equals",
+    Value: contentSubFolderID
+  }
+};
+
+
+var folderData = folderProx.retrieve("DataFolder", cols, filter);
+var contentPRODFolderID = folderData.Results[0].ID;
+
+
+//Create Stream STG Content Folder
+var description = "Content DEs Folder" + descriptionCopy;
+var deGUID = Platform.Function.GUID();  
+
+var newFolder = {
+    "Name" : contentSTGFolderName,
+    "CustomerKey" : deGUID,
+    "Description" : description,
+    "ContentType" : "DataExtension",
+    "IsActive" : "true",
+    "IsEditable" : "true",
+    "AllowChildren" : "true",
+    "ParentFolderID" : contentSubFolderID
+};
+
+var status = Folder.Add(newFolder);
+
+
+//Get Stream STG Content Folder ID
+var folderProx = new Script.Util.WSProxy();
+var cols = ["Name","ID"];
+var filter = {
+    LeftOperand:{ 
+    Property: "Name",
+    SimpleOperator: "equals",
+    Value: contentSTGFolderName
+    },
+    LogicalOperator: "AND",
+    RightOperand: {
+    Property: "ParentFolder.ID",
+    SimpleOperator: "equals",
+    Value: contentSubFolderID
+  }
+};
+
+
+var folderData = folderProx.retrieve("DataFolder", cols, filter);
+var contentSTGFolderID = folderData.Results[0].ID;
+
+
+//Set Content DE Guids
+var stgGuidROM = Platform.Function.GUID();
+var stgGuidSYM = Platform.Function.GUID();
+var prodGuidROM = Platform.Function.GUID();
+var prodGuidSYM = Platform.Function.GUID();
+
+//Update with Standard Fields
+for(i = 1; i < 4; i++){
+var prox = new Script.Util.WSProxy();
+var description = "Content DE" + descriptionCopy;
+
+ if(i == 1){
+ var stgTag = "_ROM_STG"
+ var stgGuid = stgGuidROM
+ var prodTag = "_ROM_PROD"
+ var prodGuid = prodGuidROM
+
+ } else if(i == 2){
+ var stgTag = "_SYM_STG"
+ var stgGuid = stgGuidSYM
+ var prodTag = "_SYM_PROD"
+ var prodGuid = prodGuidSYM
+ }
+
+var de_STG = {
+    Name: streamName + stgTag,
+    CustomerKey: stgGuid,
+    Description: description,
+    Fields: [
+      {FieldType: "Text",Name: "emailname",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
+      {FieldType: "Text",Name: "lang_region",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
+      {FieldType: "Text",Name: "subject",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "preheader",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
+    ],
+    CategoryID: contentSTGFolderID
+};
+
+var de_PROD = {
+    Name: streamName + prodTag,
+    CustomerKey: prodGuid,
+    Description: description,
+    Fields: [
+      {FieldType: "Text",Name: "emailname",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
+      {FieldType: "Text",Name: "lang_region",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
+      {FieldType: "Text",Name: "subject",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "preheader",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
+    ],
+    CategoryID: contentPRODFolderID
+
+};
+
+var res = prox.createBatch("DataExtension", [de_STG, de_PROD]);
+
+
+//Update with Content Fields
+for(y = 1; y < 5; y++){
+    var updateProx = new Script.Util.WSProxy();    
+
+    var newSTGFields = [
+      {FieldType: "Text",Name: "headline_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "subheadline_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "copy_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "cta_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "imgsrc_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "alttext_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
+    ];
+  
+    var newPRODFields = [
+    {FieldType: "Text",Name: "headline_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "subheadline_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "copy_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "cta_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "imgsrc_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
+      {FieldType: "Text",Name: "alttext_" + y,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
+    ];
+  
+   var stgProps = { 
+        CustomerKey: stgGuid,
+        Fields: newSTGFields 
+    };
+
+    var prodProps = { 
+        CustomerKey: prodGuid,
+        Fields: newPRODFields 
+    };
+    
+    var stgData = updateProx.updateItem("DataExtension", stgProps);
+    var prodData = updateProx.updateItem("DataExtension", prodProps);
+  };
+};
+
+} catch(e) {
+  stringify(e);
+}
+</script>
+%%[endif]%%

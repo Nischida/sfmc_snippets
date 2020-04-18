@@ -1,0 +1,32 @@
+%%[
+SET @retrieveAllQueries = CreateObject('RetrieveRequest')
+SetObjectProperty(@retrieveAllQueries, "ObjectType", "QueryDefinition")
+SET @filterForQueries = CreateObject("SimpleFilterPart")
+SetObjectProperty(@filterForQueries, "Property", "CategoryID")
+SetObjectProperty(@filterForQueries, "SimpleOperator", "greaterThanOrEqual")
+AddObjectArrayItem(@filterForQueries, "Value", "0")
+AddObjectArrayItem(@retrieveAllQueries,"Properties","Name")
+AddObjectArrayItem(@retrieveAllQueries,"Properties","QueryText")
+AddObjectArrayItem(@retrieveAllQueries,"Properties","TargetType")
+AddObjectArrayItem(@retrieveAllQueries,"Properties","TargetUpdateType")
+AddObjectArrayItem(@retrieveAllQueries,"Properties","CustomerKey")
+SetObjectProperty(@retrieveAllQueries, "Filter", @filterForQueries)
+SET @QueryRows = InvokeRetrieve(@retrieveAllQueries,@status,@reqID) 
+SET @QueryCount = ROWCOUNT(@QueryRows)
+IF @QueryCount > 0 THEN
+FOR @HyperLoop = 1 to @QueryCount DO
+SET @QueryRow = ROW(@QueryRows,@HyperLoop)
+SET @QueryName = FIELD(@QueryRow,'Name')
+SET @QueryText = FIELD(@QueryRow,'QueryText')
+SET @QueryTargetType = FIELD(@QueryRow,'TargetType')
+SET @QueryTargetUpdateType = FIELD(@QueryRow,'TargetUpdateType')
+SET @QueryTargetCustomerKey = FIELD(@QueryRow,'CustomerKey')
+]%%
+%%=V(@QueryName)=%%<br>
+%%=V(@QueryText)=%%<br><br>
+%%=V(@QueryTargetType)=%%<br><br>
+%%=V(@QueryTargetUpdateType)=%%<br><br>
+%%=V(@QueryTargetCustomerKey)=%%<br><br>
+%%[ NEXT @HyperLoop ELSE ENDIF ]%%
+%%=V(@status)=%%<br>
+%%=V(@reqID)=%%

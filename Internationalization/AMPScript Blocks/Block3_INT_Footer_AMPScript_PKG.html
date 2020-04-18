@@ -1,0 +1,19 @@
+***INT_Footer_AMPScript_PKG***
+
+%%[
+/* Set Dev and Prod Content Block IDs From INT_AMPScriptCatalog */
+set @footerDev = Lookup('INT_AMPScriptCatalog_04','ID','AssetName','')
+set @footerProd = Lookup('INT_AMPScriptCatalog_04','ID','AssetName','')
+
+if @is_footerDev == 'Y' then
+]%%
+
+<!--Development Footer-->
+%%=ContentBlockById(@footerDev)=%%
+
+%%[elseif @is_footerDev == 'N' or @is_footerDev == '' then]%%
+
+<!--Production Footer-->
+%%=ContentBlockById(@footerProd)=%%
+
+%%[endif]%%

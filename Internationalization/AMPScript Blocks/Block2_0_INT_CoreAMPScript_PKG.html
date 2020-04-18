@@ -1,0 +1,32 @@
+***INT_Core_AMPScript_PKG***
+
+<!--
+This block acts a a package for the LanguageContentLookup and INT_Dictionary AMPScript. With the addition of the @is_dev variable, we can now toggle between the Development and Production blocks from the Email Control AMPScript block rather than needing to adjust the ContentBlockById Function.
+
+This block should be set as a Reference Content Block in all emails.
+-->
+
+%%[
+
+/* Set Dev and Prod Content Block IDs From INT_AMPScriptCatalog */
+set @devContent = Lookup('INT_AMPScriptCatalog','ID','AssetName','INT_ContentLookup_DEV')
+set @devDictionary = Lookup('INT_AMPScriptCatalog','ID','AssetName','INT_Dictionary_DEV')
+set @prodContent = Lookup('INT_AMPScriptCatalog','ID','AssetName','INT_ContentLookup_PROD')
+set @prodDictionary = Lookup('INT_AMPScriptCatalog','ID','AssetName','INT_Dictionary_PROD')
+
+if @is_dev == 'Y' then
+]%%
+
+<!--DEV LanguageContentLookup Block-->
+%%=ContentBlockById(@devContent)=%%
+<!--DEV INT_Dictionary Block-->
+%%=ContentBlockById(@devDictionary)=%%
+
+%%[elseif @is_dev == 'N' or @is_dev == '' then]%%
+
+<!--PROD LanguageContentLookup Block-->
+%%=ContentBlockById(@prodContent)=%%
+<!--PROD INT_Dictionary Block-->
+%%=ContentBlockById(@prodDictionary)=%%
+
+%%[endif]%%

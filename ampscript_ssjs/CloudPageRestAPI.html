@@ -1,0 +1,32 @@
+%%[
+set @url = 'https://mc1q10jrzwsds3bcgk0jjz2s8h80.auth.marketingcloudapis.com/'
+set @auth = '{"grant_type":"client_credentials","client_id":"acftyaraksmcu4z03x31yl8t
+","client_secret":"tfpoO8I5uEWGYkRb68RUSH1Q"}'
+set @returnCode = HTTPPOST(@url,"application/json",@auth,@response)
+
+
+IF @returnCode ==  200 THEN
+   set @regex = '^{"access_token":"(.*?)",'
+   set @accessToken = REGEXMATCH(@response,@regex,1,"Multiline")
+ELSE
+ENDIF
+]%%
+
+<script runat=server>
+Platform.Load("core", "1.1.1");
+
+var prox = new Script.Util.WSProxy();
+    objectType = "BusinessUnit",
+    cols = ["Client", "ID", "ParentID", "ObjectID", "OrgID"]
+
+var desc = prox.retrieve(objectType, cols);
+
+
+var accessToken = Variable.GetValue("@accessToken")  
+var auth = 'Bearer ' + accessToken;
+
+var intURL = 'https://mc1q10jrzwsds3bcgk0jjz2s8h80.rest.marketingcloudapis.com/'
+var result = Platform.Function.HTTPGet(url ,false,0,['Authorization'],[auth],status);
+var response = Platform.Function.ParseJSON(result);
+
+</script>

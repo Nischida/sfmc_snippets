@@ -1,0 +1,65 @@
+<script runat="server">
+Platform.Load("core","1");
+
+var Name = 'INT_Dictionary';
+//Root Folder
+var parentID = ;
+var description = "Translation Data Extension for various phrases, phone numbers, etc."
+var custKeyGUID = Platform.Function.GUID();
+
+var newFolder = {
+    "Name" : streamName,
+    "CustomerKey" : custKeyGUID,
+    "Description" : description,
+    "ContentType" : "DataExtension",
+    "IsActive" : "true",
+    "IsEditable" : "true",
+    "AllowChildren" : "true",
+    "ParentFolderID" : parentID
+};
+var status = Folder.Add(newFolder);
+
+
+var folderProx = new Script.Util.WSProxy();
+var cols = ["Name","ID"];
+var filter = {
+    LeftOperand:{ 
+    Property: "Name",
+    SimpleOperator: "equals",
+    Value: Name
+    },
+    LogicalOperator: "AND",
+    RightOperand: {
+    Property: "ParentFolder.ID",
+    SimpleOperator: "equals",
+    Value: parentID
+  }
+};
+
+var folderData = folderProx.retrieve("DataFolder", cols, filter);
+var categoryID = folderData.Results[0].ID;
+
+var prox = new Script.Util.WSProxy();
+var dictionaryGuid = Platform.Function.GUID();
+
+
+var de_dictionary = {
+    Name: Name,
+    CustomerKey: dictionaryGuid,
+    Description: description,
+    Fields: [
+    //Phrase
+      {FieldType: "Boolean", Name: "phrase", IsPrimaryKey: true, IsNillable: false, IsRequired: false, DefaultValue: false},
+
+    //All Supported Languages - languages can be added later as well
+      {Name: "en-US",FieldType: "Text",MaxLength: 4000,IsPrimaryKey: false,IsNillable: true,IsRequired: true},
+      {Name: "es-US",FieldType: "Text",MaxLength: 4000,IsPrimaryKey: false,IsNillable: true,IsRequired: true},
+      {Name: "fr-CA",FieldType: "Text",MaxLength: 4000,IsPrimaryKey: false,IsNillable: true,IsRequired: true}
+      
+    ],
+    CategoryID: categoryID
+};
+
+var res = prox.create("DataExtension", de_dictionary);
+
+</script>

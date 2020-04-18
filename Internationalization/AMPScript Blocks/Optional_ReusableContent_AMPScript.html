@@ -1,0 +1,113 @@
+%%[
+/* 
+If this block throws an error, should it error out the send for this subscriber? 
+
+@stopSend = 'Y' //Stops Sends
+@stopSend = 'N' //Does Not Stop Sends
+@stopSend = ''  //Does Not Stop Sends
+*/
+
+set @stopSend = ''
+
+
+/* To set Reusable Content Block Limiting place the lang_regions you want to exclude */
+
+set @exclude = ''
+
+if IndexOf(@exclude, @lang_region) == 0 then
+
+
+/*Set Content Block ID*/
+set @contentBlockID = ''
+
+/*Set RC content DE*/
+set @ROM_STG = IIF(IndexOf(@deName,'ROM_STG')>0,1,0)
+set @SYM_STG = IIF(IndexOf(@deName,'SYM_STG')>0,1,0)
+set @ROM_PROD = IIF(IndexOf(@deName,'ROM_PROD')>0,1,0)
+set @SYM_PROD = IIF(IndexOf(@deName,'SYM_PROD')>0,1,0)
+
+if @ROM_STG == 1 then
+  set @RC_DE = 'ReusableContent_ROM_STG'
+elseif @SYM_STG == 1 then
+  set @RC_DE = 'ReusableContent_SYM_STG'
+elseif @ROM_PROD == 1 then
+  set @RC_DE = 'ReusableContent_ROM_PROD'
+elseif @SYM_PROD == 1 then
+  set @RC_DE = 'ReusableContent_SYM_PROD'
+
+/*Unable to Identify Data Extension*/
+elseif @ROM_STG == 0 and @SYM_STG == 0 and @ROM_PROD == 0 and @SYM_PROD == 0 then
+  set @errorMSG = Concat('Unable to identify ReusableContent Data Extension.')
+
+  InsertDE(@errorLogDE,'EmailAddress',emailaddr,'SendDate',Now(),'Contact_Key',_SubscriberKey,'EmailName',@emailname,'Lang_Region',@lang_region,'JobID',jobid,'BatchID',_JobSubscriberBatchID,'DataSourceName',_DataSourceName,'Error',@errorMSG)
+
+	if @stopSends == 'Y' then
+		RaiseError(@errorMSG,1,0,0,1)
+	elseif @stopSends == 'N' or Empty(@stopSends) then
+	endif
+endif
+
+
+/*Error Logging*/
+/*No Content Block ID Set*/
+if Empty(@contentBlockID) then
+set @errorMSG = Concat('No contentBlockID set for ', emailname_ ,'.')
+
+  InsertDE(@errorLogDE,'EmailAddress',emailaddr,'SendDate',Now(),'Contact_Key',_SubscriberKey,'EmailName',@emailname,'Lang_Region',@lang_region,'JobID',jobid,'BatchID',_JobSubscriberBatchID,'DataSourceName',_DataSourceName,'Error',@errorMSG)
+
+	if @stopSends == 'Y' then
+		RaiseError(@errorMSG,1,0,0,1)
+	elseif @stopSends == 'N' or Empty(@stopSends) then
+	endif
+
+/*Content Block ID Set and No Record in Data Extension*/
+elseif Not Empty(@contentBlockID) and RowCount(LookupRows(@RC_DE,'contentBlockID',@contentBlockID,'lang_region',@lang_region)) == 0 then
+
+ set @errorMSG = Concat('No record for ', @contentBlockID, ' in the ',@RC_DE,' data extension.' )
+
+  InsertDE(@errorLogDE,'EmailAddress',emailaddr,'SendDate',Now(),'Contact_Key',_SubscriberKey,'EmailName',@emailname,'Lang_Region',@lang_region,'JobID',jobid,'BatchID',_JobSubscriberBatchID,'DataSourceName',_DataSourceName,'Error',@errorMSG)
+
+	if @stopSends == 'Y' then
+		RaiseError(@errorMSG,1,0,0,1)
+	elseif @stopSends == 'N' or Empty(@stopSends) then
+	endif
+
+endif
+
+set @contentRow = LookupRows(@RC_DE,'contentBlockID',@contentBlockID,'lang_region',@lang_region)
+set @row = Row(@contentRow, 1)
+
+ set @rc_headline_1 = Field(@row, 'rc_headline_1')
+ set @rc_subheadline_1 = Field(@row, 'rc_subheadline_1')
+ set @rc_copy_1 = Field(@row, 'rc_copy_1')
+ set @rc_cta_1 = Field(@row, 'rc_cta_1')
+ set @rc_imgsrc_1 = Field(@row, 'rc_imgsrc_1')
+
+ set @rc_headline_2 = Field(@row, 'rc_headline_2')
+ set @rc_subheadline_2 = Field(@row, 'rc_subheadline_2')
+ set @rc_copy_2 = Field(@row, 'rc_copy_2')
+ set @rc_cta_2 = Field(@row, 'rc_cta_2')
+ set @rc_imgsrc_2 = Field(@row, 'rc_imgsrc_2')
+
+ set @rc_headline_3 = Field(@row, 'rc_headline_3')
+ set @rc_subheadline_3 = Field(@row, 'rc_subheadline_3')
+ set @rc_copy_3 = Field(@row, 'rc_copy_3')
+ set @rc_cta_3 = Field(@row, 'rc_cta_3')
+ set @rc_imgsrc_3 = Field(@row, 'rc_imgsrc_3')
+
+ set @rc_headline_4 = Field(@row, 'rc_headline_4')
+ set @rc_subheadline_4 = Field(@row, 'rc_subheadline_4')
+ set @rc_copy_4 = Field(@row, 'rc_copy_4')
+ set @rc_cta_4 = Field(@row, 'rc_cta_4')
+ set @rc_imgsrc_4 = Field(@row, 'rc_imgsrc_4')
+ 
+/*
+To add additional sections copy a section and change _x to the next number
+*/
+]%%
+
+
+<!-- CONTENT BLOCK HTML HERE -->
+
+
+%%[ENDIF]%%

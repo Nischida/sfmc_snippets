@@ -1,0 +1,877 @@
+%%[
+/* global constants */
+set @status = "status"
+set @smileShopNumber = Lookup('global_company_info', 'SmileShopNumber' , 'status' , @status)
+set @numberOfSmiles = Lookup('global_company_info', 'numberOfSmiles' , 'status' , @status)
+set @numberOfDentists = Lookup('global_company_info', 'numberOfDentists' , 'status' , @status)
+set @DDInvisibleAlignerMarket = Lookup('global_company_info', 'DDInvisibleAlignerMarket' , 'status' , @status)
+set @FBGroupNumber = Lookup('global_company_info', 'FBGroupNumber' , 'status' , @status)
+set @employeeCount = Lookup('global_company_info', 'employeeCount' , 'status' , @status)
+set @friendApproved = Lookup('global_company_info', 'friendApproved' , 'status' , @status)
+set @smileShopVideoLink = Lookup('global_company_info', 'smileShopVideoLink' , 'status' , @status)
+set @kitVideoLink = Lookup('global_company_info', 'kitVideoLink' , 'status' , @status)
+
+
+if @country == "US" then
+ set @showPercentLangauge = "yes"
+else 
+ set @showPercentLangauge = "no"
+endif
+
+if @country == "US" then
+ set @showText = "yes"
+else 
+ set @showText = "no"
+endif
+
+/* Find Country using country code */
+set @emailAddress = AttributeValue("emailaddr")
+set @subscriberKey = AttributeValue("_SubscriberKey")
+set @findCountry =
+LookupOrderedRows("sdc_prod_main_data_table", 0, "ModifiedDate DESC", "contact_key" , _SubscriberKey)
+  if RowCount(@findCountry) > 0 then
+    set @foundCountry = Field(Row(@findCountry, 1), "country_code")
+else
+    set @next = "yes"
+  endif
+if @next == "yes" then
+set @findCountry =
+LookupOrderedRows("sdc_prod_user_profile_table", 0, "ModifiedDate DESC", "contact_key" , _SubscriberKey)
+  if RowCount(@findCountry) > 0 then
+    set @foundCountry = Field(Row(@findCountry, 1), "country_code")
+  else
+    set @next = "yes"
+  endif
+endif
+if @next == "yes" then
+set @findCountry =
+LookupOrderedRows("sdc_prod_leads_table", 0, "ModifiedDate DESC", "contact_key" , _SubscriberKey)
+  if RowCount(@findCountry) > 0 then
+    set @foundCountry = Field(Row(@findCountry, 1), "country_code")
+  else
+    set @next = "yes"
+endif
+endif
+
+/* old code, don't need to update but need to keep for OG international customers who don't have a country code */
+if @next == "yes" then
+set @findZip =
+LookupOrderedRows("Customer_Zipcode_Table", 0, "zip_code DESC", "contact_key" , _SubscriberKey)
+  if RowCount(@findZip) > 0 then
+    set @zipCode = Field(Row(@findZip, 1), "zip_code")
+    if not empty(@zipCode) then
+      if length(@zipCode) > 4 then
+        set @firstFiveNums = Substring(@zipCode,1,5)
+        set @checkUS = LookupOrderedRows("closest_smile_shop_by_zip", 0, "zip_code DESC", "zip_code" , @firstFiveNums)
+          if RowCount(@checkUS) > 0 then
+            set @foundCountry = "US"
+          else
+            set @firstSixChar = Uppercase(Substring(@zipCode,1,6))
+            set @checkCanada1 = LookupOrderedRows("closest_smile_shop_by_zip_ca", 0, "zip_code DESC", "zip_code" , @firstSixChar)
+            if RowCount(@checkCanada1) > 0 then
+            set @first3 = Substring(@firstSixChar,1,3)
+            set @last3 = Substring(@firstSixChar,4,6)
+            set @concatZip = concat(@first3,' ',@last3)
+            endif
+            set @firstSevenChar = Uppercase(Substring(@zipCode,1,7))
+            set @checkCanada = LookupOrderedRows("Canadian_Postal_Code_Table", 0, "Postal_code DESC", "Postal_Code" , @firstSevenChar)
+            if (RowCount(@checkCanada) > 0) or (RowCount(@checkCanada1) > 0) then
+              set @foundCountry = "CA"
+            endif
+          endif
+      else
+        if length(@zipCode) == 4 then 
+          set @checkAu = LookupOrderedRows("closest_smile_shop_by_zip_au", 0, "zip_code DESC", "zip_code" , @zipCode)
+            if RowCount(@checkAu) > 0 then
+              set @foundCountry = "AU"
+            endif
+        endif
+        endif
+      endif
+    endif
+endif
+if empty(@foundCountry) then
+ set @next = "yes"
+endif
+endif
+if @next == "yes" then
+set @findZipinLeads =
+LookupOrderedRows("sdc_prod_leads_table", 0, "zip_code DESC", "contact_key" , _SubscriberKey)
+  if RowCount(@findZipinLeads) > 0 then
+    set @zipCode = Field(Row(@findZipinLeads, 1), "zip_code")
+    if not empty(@zipCode) then
+       if length(@zipCode) == 4 then 
+          set @checkAu = LookupOrderedRows("closest_smile_shop_by_zip_au", 0, "zip_code DESC", "zip_code" , @zipCode)
+            if RowCount(@checkAu) > 0 then
+              set @foundCountry = "AU"
+            endif
+          endif
+      if length(@zipCode) > 4 then
+        set @firstFiveNums = Substring(@zipCode,1,5)
+        set @checkUS = LookupOrderedRows("closest_smile_shop_by_zip", 0, "zip_code DESC", "zip_code" , @firstFiveNums)
+          if RowCount(@checkUS) > 0 then
+            set @foundCountry = "US"
+          else
+            set @firstSixChar = Uppercase(Substring(@zipCode,1,6))
+            set @checkCanada1 = LookupOrderedRows("closest_smile_shop_by_zip_ca", 0, "zip_code DESC", "zip_code" , @firstSixChar)
+            if RowCount(@checkCanada1) > 0 then
+            set @first3 = Substring(@firstSixChar,1,3)
+            set @last3 = Substring(@firstSixChar,4,6)
+            set @concatZip = concat(@first3,' ',@last3)
+            endif
+            set @firstSevenChar = Uppercase(Substring(@zipCode,1,7))
+            set @checkCanada = LookupOrderedRows("Canadian_Postal_Code_Table", 0, "Postal_code DESC", "Postal_Code" , @firstSevenChar)
+            if (RowCount(@checkCanada) > 0) or (RowCount(@checkCanada1) > 0)then
+              set @foundCountry = "CA"            
+            endif
+        endif
+      endif
+    endif
+endif
+endif
+
+/* ADD A NEW elseif statement for any new country */
+if @foundCountry == "US" then 
+  set @country  = "US"
+elseif @foundCountry == "CA" then 
+  set @country = "Canada"
+elseif @foundCountry == "AU" then 
+  set @country = "Australia"
+elseif @foundCountry == "GB" then 
+  set @country = "UK"
+elseif @foundCountry == "NZ" then 
+  set @country = "NewZealand"
+elseif @foundCountry == "IE" then 
+  set @country = "Ireland"
+else
+  set @country = "default"
+endif
+
+/* find zip and handle language differences ie. PR, Quebec */
+if empty(@zipCode) then
+set @findZip =
+LookupOrderedRows("Customer_Zipcode_Table", 0, "zip_code DESC", "contact_key" , _SubscriberKey)
+  if RowCount(@findZip) > 0 then
+    set @zipCode = Field(Row(@findZip, 1), "zip_code")
+  else
+    set @findZipinLeads =
+LookupOrderedRows("sdc_prod_leads_table", 0, "zip_code DESC", "contact_key" , _SubscriberKey)
+  if RowCount(@findZipinLeads) > 0 then
+    set @zipCode = Field(Row(@findZipinLeads, 1), "zip_code")
+  endif  
+endif
+endif
+
+set @PRCheck = Lookup("closest_smile_shop_by_zip","state", "zip_code", @zipCode)
+if @PRCheck == "PR" then
+  set @language = "Spanish"
+  set @lang_country = ""
+endif
+
+set @quebecCheck = Lookup("QC_Postal_Code_Table","Province_Abbr", "Postal_Code", @zipCode)
+ if @quebecCheck == "QC" then
+   set @language = "FrenchCanadian"
+   set @lang_country = "/fr-ca"
+endif
+
+
+
+/* International Dictionary Lookups */
+  set @doctorORorthondistCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "doctorORorthondist")
+  if not empty(@doctorORorthondistCheck) then 
+    set @doctorORorthondist = @doctorORorthondistCheck
+  else
+  set @doctorORorthondist = Lookup("INT_Dictionary","en-US","Phrase","doctorORorthondist")
+  endif
+  set @doctorCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "doctor")
+  if not empty(@doctorCheck) then 
+    set @doctor = @doctorCheck
+  else
+  set @doctor = Lookup("INT_Dictionary","en-US","Phrase","doctor")
+  endif
+  set @mailHeadlineCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "mailHeadline")
+  if not empty(@mailHeadlineCheck) then 
+    set @mailHeadline = @mailHeadlineCheck
+  else
+  set @mailHeadline = Lookup("INT_Dictionary","en-US","Phrase","mailHeadline")
+  endif
+  set @mailBodyCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "mailBody")
+  if not empty(@mailBodyCheck) then 
+    set @mailBody = @mailBodyCheck
+  else
+  set @mailBody = Lookup("INT_Dictionary","en-US","Phrase","mailBody")
+  endif
+  set @singlePayPriceCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "singlePayPrice")
+   if not empty(@singlePayPriceCheck) then 
+    set @singlePayPrice = @singlePayPriceCheck
+  else
+  set @singlePayPrice = Lookup("INT_Dictionary","en-US","Phrase","singlePayPrice")
+  endif
+  set @smilePayTotalPriceCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "smilePayTotalPrice")
+  if not empty(@smilePayTotalPriceCheck) then 
+    set @smilePayTotalPrice = @smilePayTotalPriceCheck
+  else
+  set @smilePayTotalPrice = Lookup("INT_Dictionary","en-US","Phrase","smilePayTotalPrice")
+  endif
+  set @downPaymentCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "downPayment")
+  if not empty(@downPaymentCheck) then 
+    set @downPayment = @downPaymentCheck
+  else
+  set @downPayment = Lookup("INT_Dictionary","en-US","Phrase","downPayment")
+  endif
+  set @smilePayMonHundDiscountCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "smilePayMonHundDiscount")
+  if not empty(@smilePayMonHundDiscountCheck) then 
+    set @smilePayMonHundDiscount = @smilePayMonHundDiscountCheck
+  else
+  set @smilePayMonHundDiscount = Lookup("INT_Dictionary","en-US","Phrase","smilePayMonHundDiscount")
+  endif
+  set @currencyCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "currency")
+  if not empty(@currencyCheck) then 
+    set @currency = @currencyCheck
+  else
+  set @currency = Lookup("INT_Dictionary","en-US","Phrase","currency")
+  endif
+  set @doctorHeadlineCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "doctorHeadline")
+  if not empty(@doctorHeadlineCheck) then 
+    set @doctorHeadline = @doctorHeadlineCheck
+  else
+  set @doctorHeadline = Lookup("INT_Dictionary","en-US","Phrase","doctorHeadline")
+  endif
+  set @kitPriceCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "kitPrice")
+  if not empty(@kitPriceCheck) then 
+    set @kitPrice = @kitPriceCheck
+  else
+  set @kitPrice = Lookup("INT_Dictionary","en-US","Phrase","kitPrice")
+  endif
+  set @retainerPriceCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "retainerPrice")
+  if not empty(@retainerPriceCheck) then 
+    set @retainerPrice = @retainerPriceCheck
+  else
+  set @retainerPrice = Lookup("INT_Dictionary","en-US","Phrase","retainerPrice")
+  endif
+  set @retakeKitPriceCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "retakeKitPrice")
+  if not empty(@retakeKitPriceCheck) then 
+    set @retakeKitPrice = @retakeKitPriceCheck
+  else
+  set @retakeKitPrice = Lookup("INT_Dictionary","en-US","Phrase","retakeKitPrice")
+  endif
+  set @replacementAlignersPriceCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "replacementAlignersPrice")
+  if not empty(@replacementAlignersPriceCheck) then 
+    set @replacementAlignersPrice = @replacementAlignersPriceCheck
+  else
+  set @replacementAlignersPrice = Lookup("INT_Dictionary","en-US","Phrase","replacementAlignersPrice")
+  endif
+  set @brightOnValueCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "brightOnValue")
+  if not empty(@brightOnValueCheck) then 
+    set @brightOnValue = @brightOnValueCheck
+  else
+  set @brightOnValue = Lookup("INT_Dictionary","en-US","Phrase","brightOnValue")
+  endif
+  set @smilePayPaymentAmtCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "smilePayPaymentAmt")
+  if not empty(@smilePayPaymentAmtCheck) then 
+    set @smilePayPaymentAmt = @smilePayPaymentAmtCheck
+  else
+  set @smilePayPaymentAmt = Lookup("INT_Dictionary","en-US","Phrase","smilePayPaymentAmt")
+  endif
+  set @lowercaseDoctorCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "lowercaseDoctor")
+  if not empty(@lowercaseDoctorCheck) then 
+    set @lowercaseDoctor = @lowercaseDoctorCheck
+  else
+  set @lowercaseDoctor = Lookup("INT_Dictionary","en-US","Phrase","lowercaseDoctor")
+  endif
+  set @lowercaseDoctorSecondCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "lowercaseDoctorSecond")
+  if not empty(@lowercaseDoctorSecondCheck) then 
+    set @lowercaseDoctorSecond = @lowercaseDoctorSecondCheck
+  else
+  set @lowercaseDoctorSecond = Lookup("INT_Dictionary","en-US","Phrase","lowercaseDoctorSecond")
+  endif
+  set @dealCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "deal")
+  if not empty(@dealCheck) then 
+    set @deal = @dealCheck
+  else
+  set @deal = Lookup("INT_Dictionary","en-US","Phrase","deal")
+  endif
+  set @stepTwoCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "stepTwo")
+  if not empty(@stepTwoCheck) then 
+    set @stepTwo = @stepTwoCheck
+  else
+  set @stepTwo = Lookup("INT_Dictionary","en-US","Phrase","stepTwo")
+  endif
+  set @alignerShipTimeCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "alignerShipTime")
+  if not empty(@alignerShipTimeCheck) then 
+    set @alignerShipTime = @alignerShipTimeCheck
+  else
+  set @alignerShipTime = Lookup("INT_Dictionary","en-US","Phrase","alignerShipTime")
+  endif
+  set @percentLessCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "percentLess")
+  if not empty(@percentLessCheck) then 
+    set @percentLess = @percentLessCheck
+  else
+  set @percentLess = Lookup("INT_Dictionary","en-US","Phrase","percentLess")
+  endif
+  set @apptPhoneCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "apptPhone")
+  if not empty(@apptPhoneCheck) then 
+    set @apptPhone = @apptPhoneCheck
+  else
+  set @apptPhone = Lookup("INT_Dictionary","en-US","Phrase","apptPhone")
+  endif
+  set @aDoctorCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "aDoctor")
+  if not empty(@aDoctorCheck) then 
+    set @aDoctor = @aDoctorCheck
+  else
+  set @aDoctor = Lookup("INT_Dictionary","en-US","Phrase","aDoctor")
+  endif
+  set @100offCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "100off")
+  if not empty(@100offCheck) then 
+    set @100off = @100offCheck
+  else
+  set @100off = Lookup("INT_Dictionary","en-US","Phrase","100off")
+  endif
+  set @150offCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "150off")
+  if not empty(@150offCheck) then 
+    set @150off = @150offCheck
+  else
+  set @150off = Lookup("INT_Dictionary","en-US","Phrase","150off")
+  endif
+  set @200offCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "200off")
+  if not empty(@200offCheck) then 
+    set @200off = @200offCheck
+  else
+  set @200off = Lookup("INT_Dictionary","en-US","Phrase","200off")
+  endif
+  set @2ways2payCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "2ways2pay")
+  if not empty(@2ways2payCheck) then 
+    set @2ways2pay = @2ways2payCheck
+  else
+  set @2ways2pay = Lookup("INT_Dictionary","en-US","Phrase","2ways2pay")
+  endif
+  set @collectionsPhoneCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "collectionsPhone")
+  if not empty(@collectionsPhoneCheck) then 
+    set @collectionsPhone = @collectionsPhoneCheck
+  else
+  set @collectionsPhone = Lookup("INT_Dictionary","en-US","Phrase","collectionsPhone")
+  endif
+  set @postScanTpWaitTimeCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "postScanTpWaitTime")
+  if not empty(@postScanTpWaitTimeCheck) then 
+    set @postScanTpWaitTime = @postScanTpWaitTimeCheck
+  else
+  set @postScanTpWaitTime = Lookup("INT_Dictionary","en-US","Phrase","postScanTpWaitTime")
+  endif
+  set @save45Check = Lookup("INT_Dictionary",@lang_region, "Phrase", "save45")
+  if not empty(@save45Check) then 
+    set @save45 = @save45Check
+  else
+  set @save45 = Lookup("INT_Dictionary","en-US","Phrase","save45")
+  endif
+  set @ambassadorAmountCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "ambassadorAmount")
+  if not empty(@ambassadorAmountCheck) then 
+    set @ambassadorAmount = @ambassadorAmountCheck
+  else
+  set @ambassadorAmount = Lookup("INT_Dictionary","en-US","Phrase","ambassadorAmount")
+  endif
+  set @KSLEADkitCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "KSLEADkit")
+  if not empty(@KSLEADkitCheck) then 
+    set @KSLEADkit = @KSLEADkitCheck
+  else
+  set @KSLEADkit = Lookup("INT_Dictionary","en-US","Phrase","KSLEADkit")
+  endif
+  set @KSLEADpaymentCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "KSLEADpayment")
+  if not empty(@KSLEADpaymentCheck) then 
+    set @KSLEADpayment = @KSLEADpaymentCheck
+  else
+  set @KSLEADpayment = Lookup("INT_Dictionary","en-US","Phrase","KSLEADpayment")
+  endif
+  set @singleDealCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "singleDeal")
+  if not empty(@singleDealCheck) then 
+    set @singleDeal = @singleDealCheck
+  else
+  set @singleDeal = Lookup("INT_Dictionary","en-US","Phrase","singleDeal")
+  endif
+  set @smileDealCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "smileDeal")
+  if not empty(@smileDealCheck) then 
+    set @smileDeal = @smileDealCheck
+  else
+  set @smileDeal = Lookup("INT_Dictionary","en-US","Phrase","smileDeal")
+  endif
+  set @getstartednowCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "GETSTARTEDNOWlink")
+  if not empty(@getstartednowCheck) then 
+    set @GETSTARTEDNOWlink = @getstartednowCheck
+  else
+  set @GETSTARTEDNOWlink = Lookup("INT_Dictionary","en-US","Phrase","GETSTARTEDNOWlink")
+  endif
+  set @productPageCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "productPage")
+  if not empty(@productPageCheck) then 
+    set @productPage = @productPageCheck
+  else
+  set @productPage = Lookup("INT_Dictionary","en-US","Phrase","productPage")
+  endif
+  set @buyAKitCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "buyAKit")
+  if not empty(@buyAKitCheck) then 
+    set @buyAKit = @buyAKitCheck
+  else
+  set @buyAKit = Lookup("INT_Dictionary","en-US","Phrase","buyAKit")
+  endif
+  set @NEWSMILE50linkCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "NEWSMILE50link")
+  if not empty(@NEWSMILE50linkCheck) then 
+    set @NEWSMILE50link = @NEWSMILE50linkCheck
+  else
+  set @NEWSMILE50link = Lookup("INT_Dictionary","en-US","Phrase","NEWSMILE50link")
+  endif
+  set @comCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "com")
+  if not empty(@comCheck) then 
+    set @com = @comCheck
+  else
+  set @com = Lookup("INT_Dictionary","en-US","Phrase","com")
+  endif
+  set @salesCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "sales")
+  if not empty(@salesCheck) then 
+    set @sales = @salesCheck
+  else
+  set @sales = Lookup("INT_Dictionary","en-US","Phrase","sales")
+  endif
+  set @customerCareCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "customerCare")
+  if not empty(@customerCareCheck) then 
+    set @customerCare = @customerCareCheck
+  else
+  set @customerCare = Lookup("INT_Dictionary","en-US","Phrase","customerCare")
+  endif
+  set @otherCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "other")
+  if not empty(@otherCheck) then 
+    set @other = @otherCheck
+  else
+  set @other = Lookup("INT_Dictionary","en-US","Phrase","other")
+  endif
+  set @schedulingCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "scheduling")
+  if not empty(@schedulingCheck) then 
+    set @scheduling = @schedulingCheck
+  else
+  set @scheduling = Lookup("INT_Dictionary","en-US","Phrase","scheduling")
+  endif
+  set @retainerPhoneCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "retainerPhone")
+  if not empty(@retainerPhoneCheck) then 
+    set @retainerPhone = @retainerPhoneCheck
+  else
+  set @retainerPhone = Lookup("INT_Dictionary","en-US","Phrase","retainerPhone")
+  endif
+  set @getbrightPriceCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "getbrightPrice")
+  if not empty(@getbrightPriceCheck) then 
+    set @getbrightPrice = @getbrightPriceCheck
+  else
+  set @getbrightPrice = Lookup("INT_Dictionary","en-US","Phrase","getbrightPrice")
+  endif
+  set @whiteningCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "whitening")
+  if not empty(@whiteningCheck) then 
+    set @whitening = @whiteningCheck
+  else
+  set @whitening = Lookup("INT_Dictionary","en-US","Phrase","whitening")
+  endif
+  set @showInsCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "showIns")
+  if not empty(@showInsCheck) then 
+    set @showIns = @showInsCheck
+  else
+  set @showIns = Lookup("INT_Dictionary","en-US","Phrase","showIns")
+  endif
+  set @insuranceCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "insurance")
+  if not empty(@insuranceCheck) then 
+    set @insurance = @insuranceCheck
+  else
+  set @insurance = Lookup("INT_Dictionary","en-US","Phrase","insurance")
+  endif
+  set @showCareCreditCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "showCareCredit")
+  if not empty(@showCareCreditCheck) then 
+    set @showCareCredit = @showCareCreditCheck
+  else
+  set @showCareCredit = Lookup("INT_Dictionary","en-US","Phrase","showCareCredit")
+  endif
+  set @IDcheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "ID")
+  if not empty(@IDcheck) then 
+    set @ID = @IDcheck
+  else
+  set @ID = Lookup("INT_Dictionary","en-US","Phrase","ID")
+  endif
+  set @showTypeformCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "showTypeform")
+  if not empty(@showTypeformCheck) then 
+    set @showTypeform = @showTypeformCheck
+  else
+  set @showTypeform = Lookup("INT_Dictionary","en-US","Phrase","showTypeform")
+  endif
+  set @showGoogleReviewCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "showGoogleReview")
+  if not empty(@showGoogleReviewCheck) then 
+    set @showGoogleReview = @showGoogleReviewCheck
+  else
+  set @showGoogleReview = Lookup("INT_Dictionary","en-US","Phrase","showGoogleReview")
+  endif
+   set @yourInsCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "yourIns")
+  if not empty(@yourInsCheck) then 
+    set @yourIns = @yourInsCheck
+  else
+  set @yourIns = Lookup("INT_Dictionary","en-US","Phrase","yourIns")
+  endif
+  set @hasAmbassadorProgramCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "hasAmbassadorProgram")
+  if not empty(@hasAmbassadorProgramCheck) then 
+    set @hasAmbassadorProgram = @hasAmbassadorProgramCheck
+  else
+  set @hasAmbassadorProgram = Lookup("INT_Dictionary","en-US","Phrase","hasAmbassadorProgram")
+  endif
+  set @dateFormatCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "dateFormat")
+  if not empty(@dateFormatCheck) then 
+    set @dateFormat = @dateFormatCheck
+  else
+  set @dateFormat = Lookup("INT_Dictionary","en-US","Phrase","dateFormat")
+  endif
+  set @showUnsubOnTransactionalCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "showUnsubOnTransactional")
+  if not empty(@showUnsubOnTransactionalCheck) then 
+    set @showUnsubOnTransactional = @showUnsubOnTransactionalCheck
+  else
+  set @showUnsubOnTransactional = Lookup("INT_Dictionary","en-US","Phrase","showUnsubOnTransactional")
+  endif
+  set @showFSACheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "showFSA")
+  if not empty(@showFSACheck) then 
+    set @showFSA = @showFSACheck
+  else
+  set @showFSA = Lookup("INT_Dictionary","en-US","Phrase","showFSA")
+  endif
+  set @SmilePayMonthsCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "SmilePayMonths")
+  if not empty(@SmilePayMonthsCheck) then 
+    set @SmilePayMonths = @SmilePayMonthsCheck
+  else
+  set @SmilePayMonths = Lookup("INT_Dictionary","en-US","Phrase","SmilePayMonths")
+  endif
+  set @kleadWhiteningCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "kleadWhitening")
+  if not empty(@kleadWhiteningCheck) then 
+    set @kleadWhitening = @kleadWhiteningCheck
+  else
+  set @kleadWhitening = Lookup("INT_Dictionary","en-US","Phrase","kleadWhitening")
+  endif
+  set @kitShipTimeCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "kitShipTime")
+  if not empty(@kitShipTimeCheck) then 
+    set @kitShipTime = @kitShipTimeCheck
+  else
+  set @kitShipTime = Lookup("INT_Dictionary","en-US","Phrase","kitShipTime")
+  endif
+  set @footerAddressCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "footerAddress")
+  if not empty(@footerAddressCheck) then 
+    set @footerAddress = @footerAddressCheck
+  else
+  set @footerAddress = Lookup("INT_Dictionary","en-US","Phrase","footerAddress")
+  endif
+  set @rebatePrgmCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "rebatePrgm")
+  if not empty(@rebatePrgmCheck) then 
+    set @rebatePrgm = @rebatePrgmCheck
+  else
+  set @rebatePrgm = Lookup("INT_Dictionary","en-US","Phrase","rebatePrgm")
+  endif
+  set @hostCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "host")
+  if not empty(@hostCheck) then 
+    set @host = @hostCheck
+  else
+  set @host = Lookup("INT_Dictionary","en-US","Phrase","host")
+  endif
+  set @rebateCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "rebate")
+  if not empty(@rebateCheck) then 
+    set @rebate = @rebateCheck
+  else
+  set @rebate = Lookup("INT_Dictionary","en-US","Phrase","rebate")
+  endif
+  set @futureGrinnerCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "futureGrinner")
+  if not empty(@futureGrinnerCheck) then 
+    set @futureGrinner = @futureGrinnerCheck
+  else
+  set @futureGrinner = Lookup("INT_Dictionary","en-US","Phrase","futureGrinner")
+  endif
+  set @NeighborhoodCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "Neighborhood")
+  if not empty(@NeighborhoodCheck) then 
+    set @Neighborhood = @NeighborhoodCheck
+  else
+  set @Neighborhood = Lookup("INT_Dictionary","en-US","Phrase","Neighborhood")
+  endif
+  set @SMSKeywordCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "SMSKeyword")
+  if not empty(@SMSKeywordCheck) then 
+    set @SMSKeyword = @SMSKeywordCheck
+  endif
+  set @WereCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "We're")
+  if not empty(@WereCheck) then 
+    set @Were = @WereCheck
+  else
+  set @Were = Lookup("INT_Dictionary","en-US","Phrase","We're")
+  endif
+  set @eyebrowtextBookAScanCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "eyebrowtextBookAScan")
+  if not empty(@eyebrowtextBookAScanCheck) then 
+    set @eyebrowtextBookAScan = @eyebrowtextBookAScanCheck
+  else
+  set @eyebrowtextBookAScan = Lookup("INT_Dictionary","en-US","Phrase","eyebrowtextBookAScan")
+  endif
+  set @eyebrowtextBuyAKitCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "eyebrowtextBuyAKit")
+  if not empty(@eyebrowtextBuyAKitCheck) then 
+    set @eyebrowtextBuyAKit = @eyebrowtextBuyAKitCheck
+  else
+  set @eyebrowtextBuyAKit = Lookup("INT_Dictionary","en-US","Phrase","eyebrowtextBuyAKit")
+  endif
+  set @eyebrowtextBuyAKitCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "shopNameFallback")
+  if not empty(@shopNameFallbackCheck) then 
+    set @shopNameFallback = @shopNameFallbackCheck
+  else
+  set @shopNameFallback = Lookup("INT_Dictionary","en-US","Phrase","shopNameFallback")
+  endif
+  set @issueSpacingCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "issueSpacing")
+  if not empty(@issueSpacingCheck) then 
+    set @issueSpacing = @issueSpacingCheck
+  else
+  set @issueSpacing = Lookup("INT_Dictionary","en-US","Phrase","issueSpacing")
+  endif
+  set @issueBiteCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "issueBite")
+  if not empty(@issueBiteCheck) then 
+    set @issueBite = @issueBiteCheck
+  else
+  set @issueBite = Lookup("INT_Dictionary","en-US","Phrase","issueBite")
+  endif
+  set @issueCrowdingCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "issueCrowding")
+  if not empty(@issueCrowdingCheck) then 
+    set @issueCrowding = @issueCrowdingCheck
+  else
+  set @issueCrowding = Lookup("INT_Dictionary","en-US","Phrase","issueCrowding")
+  endif
+  set @issueSmileCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "issueSmile")
+  if not empty(@issueSmileCheck) then 
+    set @issueSmile = @issueSmileCheck
+  else
+  set @issueSmile = Lookup("INT_Dictionary","en-US","Phrase","issueSmile")
+  endif
+  set @ssBannerEveryoneCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "ssBannerEveryone")
+  if not empty(@ssBannerEveryoneCheck) then 
+    set @ssBannerEveryone = @ssBannerEveryoneCheck
+  else
+  set @ssBannerEveryone = Lookup("INT_Dictionary","en-US","Phrase","ssBannerEveryone")
+  endif
+  set @ssBannerEitherWayCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "ssBannerEitherWay")
+  if not empty(@ssBannerEitherWayCheck) then 
+    set @ssBannerEitherWay = @ssBannerEitherWayCheck
+  else
+  set @ssBannerEitherWay = Lookup("INT_Dictionary","en-US","Phrase","ssBannerEitherWay")
+  endif
+  set @ccCopyRescheduledCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "ccCopyRescheduled")
+  if not empty(@ccCopyRescheduledCheck) then 
+    set @ccCopyRescheduled = @ccCopyRescheduledCheck
+  else
+  set @ccCopyRescheduled = Lookup("INT_Dictionary","en-US","Phrase","ccCopyRescheduled")
+  endif
+  set @ccCopyBookedCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "ccCopyBooked")
+  if not empty(@ccCopyBookedCheck) then 
+    set @ccCopyBooked = @ccCopyBookedCheck
+  else
+  set @ccCopyBooked = Lookup("INT_Dictionary","en-US","Phrase","ccCopyBooked")
+  endif
+  set @name2HasNameCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "name2HasName")
+  if not empty(@name2HasNameCheck) then 
+    set @name2HasName = @name2HasNameCheck
+  else
+  set @name2HasName = Lookup("INT_Dictionary","en-US","Phrase","name2HasName")
+  endif
+  set @name2NoNameCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "name2NoName")
+  if not empty(@name2NoNameCheck) then 
+    set @name2NoName = @name2NoNameCheck
+  else
+  set @name2NoName = Lookup("INT_Dictionary","en-US","Phrase","name2NoName")
+  endif
+  set @OnceYouArriveSmileBusCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "OnceYouArriveSmileBus")
+  if not empty(@OnceYouArriveSmileBusCheck) then 
+    set @OnceYouArriveSmileBus = @OnceYouArriveSmileBusCheck
+  else
+  set @OnceYouArriveSmileBus = Lookup("INT_Dictionary","en-US","Phrase","OnceYouArriveSmileBus")
+  endif
+  set @OnceYouArriveOtherCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "OnceYouArriveOther")
+  if not empty(@OnceYouArriveOtherCheck) then 
+    set @OnceYouArriveOther = @OnceYouArriveOtherCheck
+  else
+  set @OnceYouArriveOther = Lookup("INT_Dictionary","en-US","Phrase","OnceYouArriveOther")
+  endif
+  set @kitContainerBagCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "kitContainerBag")
+  if not empty(@kitContainerBagCheck) then 
+    set @kitContainerBag = @kitContainerBagCheck
+  else
+  set @kitContainerBag = Lookup("INT_Dictionary","en-US","Phrase","kitContainerBag")
+  endif
+  set @kitContainerBoxCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "kitContainerBox")
+  if not empty(@kitContainerBoxCheck) then 
+    set @kitContainerBox = @kitContainerBoxCheck
+  else
+  set @kitContainerBox = Lookup("INT_Dictionary","en-US","Phrase","kitContainerBox")
+  endif
+  set @trackingCopyTrackingCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "trackingCopyTracking")
+  if not empty(@trackingCopyTrackingCheck) then 
+    set @trackingCopyTracking = @trackingCopyTrackingCheck
+  else
+  set @trackingCopyTracking = Lookup("INT_Dictionary","en-US","Phrase","trackingCopyTracking")
+  endif
+  set @trackingCopyCallCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "trackingCopyCall")
+  if not empty(@trackingCopyCallCheck) then 
+    set @trackingCopyCall = @trackingCopyCallCheck
+  else
+  set @trackingCopyCall = Lookup("INT_Dictionary","en-US","Phrase","trackingCopyCall")
+  endif
+  set @BRDCSTAlignerCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "BRDCSTAligner")
+  if not empty(@BRDCSTAlignerCheck) then 
+    set @BRDCSTAligner = @BRDCSTAlignerCheck
+  else
+  set @BRDCSTAligner = Lookup("INT_Dictionary","en-US","Phrase","BRDCSTAligner")
+  endif
+  set @BRDCSTRebateCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "BRDCSTRebate")
+  if not empty(@BRDCSTRebateCheck) then 
+    set @BRDCSTRebate = @BRDCSTRebateCheck
+  endif
+  set @BRDCSTFreeAlignerUSCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "BRDCSTFreeAlignerUS")
+  if not empty(@BRDCSTFreeAlignerUSCheck) then 
+    set @BRDCSTFreeAlignerUS = @BRDCSTFreeAlignerUSCheck
+  else
+  set @BRDCSTFreeAlignerUS = Lookup("INT_Dictionary","en-US","Phrase","BRDCSTFreeAlignerUS")
+  endif
+  set @BRDCSTFreeAlignerCACheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "BRDCSTFreeAlignerCA")
+  if not empty(@BRDCSTFreeAlignerCACheck) then 
+    set @BRDCSTFreeAlignerCA = @BRDCSTFreeAlignerCACheck
+  endif
+  set @BRDCSTAmzGCCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "BRDCSTAmzGC")
+  if not empty(@BRDCSTAmzGCCheck) then 
+    set @BRDCSTAmzGC = @BRDCSTAmzGCCheck
+  endif
+  set @BRDCSTAmzGC_USCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "BRDCSTAmzGC-US")
+  if not empty(@BRDCSTAmzGC_USCheck) then 
+    set @BRDCSTAmzGC_US = @BRDCSTAmzGC_USCheck
+  endif
+  set @BRDCSTAmzGC_CACheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "BRDCSTAmzGC-CA")
+  if not empty(@BRDCSTAmzGC_CACheck) then 
+    set @BRDCSTAmzGC_CA = @BRDCSTAmzGC_CACheck
+  endif
+  set @BRDCSTWhiteningCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "BRDCSTWhitening")
+  if not empty(@BRDCSTWhiteningCheck) then 
+    set @BRDCSTWhitening = @BRDCSTWhiteningCheck
+  endif
+  set @SMSNoShowCheck = Lookup("INT_Dictionary",@lang_region, "Phrase", "SMSNoShow")
+  if not empty(@SMSNoShowCheck) then 
+    set @SMSNoShow = @SMSNoShowCheck
+  else
+  set @SMSNoShow = Lookup("INT_Dictionary","en-US","Phrase","SMSNoShow")
+  endif
+  
+
+
+if @hasAmbassadorProgram == "yes" then
+ set @GiveCheck = Lookup("inviteAFriend_dynamicOffers","Give", "Country", @country)
+  if not empty(@GiveCheck) then 
+    set @give = @GiveCheck
+  else
+    set @give = @ambassadorAmount
+  endif
+  set @GetCheck = Lookup("inviteAFriend_dynamicOffers","Get", "Country", @country)
+  if not empty(@GetCheck) then 
+    set @get = @GetCheck
+  else 
+    set @get = @ambassadorAmount
+  endif
+  else
+   set @give = @ambassadorAmount
+   set @get = @ambassadorAmount
+endif
+
+/* override @com for languages other than country default */
+if @language == "FrenchCanadian" then
+ set @com = ".ca/fr-ca"
+endif
+
+if @country == "Ireland" then
+/* define global links for Ireland because for some reason they are different */
+set @reschedule = Concat("https://smiledirect",@com,"/reschedule/")
+set @home = Concat("https://smiledirect",@com,"/")
+set @results = Concat("https://smiledirect",@com,"/results/")
+set @how = Concat("https://smiledirect",@com,"/how_it_works/")
+set @portal = Concat("https://smiledirect",@com,"/patient-portal/")
+set @settings = Concat("https://smiledirect",@com,"/patient-portal/settings")
+set @pricing = Concat("https://smiledirect",@com,"/pricing/")
+set @scan = Concat("https://smiledirect",@com,"/checkout/?w=scekss")
+set @product = Concat("https://smiledirect",@com,"/product-landing?postal_code=",@zip)
+set @getStarted = Concat("https://smiledirect",@com,"/product-landing?postal_code=",@zipCode)
+set @kit = Concat("https://smiledirect",@com,"/checkout/?w=impr")
+set @locations = Concat("https://smiledirect",@com,"/locations/")
+set @faq = Concat("https://smiledirect",@com,"/faq/")
+set @ins = Concat("https://smiledirect",@com,"/insurance/get-started/")
+set @aligners = Concat("https://smiledirect",@com,"/checkout-aligner/")
+set @returns = Concat("https://smiledirect",@com,"/returns/")
+set @invite = Concat("https://smiledirect",@com,"/invite")
+set @privacy = Concat("https://smiledirect",@com,"/privacy")
+
+else
+
+/* define global links */
+set @reschedule = Concat("https://smiledirectclub",@com,"/reschedule/")
+set @home = Concat("https://smiledirectclub",@com,"/")
+set @results = Concat("https://smiledirectclub",@com,"/results/")
+set @how = Concat("https://smiledirectclub",@com,"/how_it_works/")
+set @portal = Concat("https://smiledirectclub",@com,"/patient-portal/")
+set @settings = Concat("https://smiledirectclub",@com,"/patient-portal/settings")
+set @pricing = Concat("https://smiledirectclub",@com,"/pricing/")
+set @scan = Concat("https://smiledirectclub",@com,"/checkout/?w=scekss")
+set @product = Concat("https://smiledirectclub",@com,"/product-landing?postal_code=",@zip)
+set @getStarted = Concat("https://smiledirectclub",@com,"/product-landing?postal_code=",@zipCode)
+set @kit = Concat("https://smiledirectclub",@com,"/checkout/?w=impr")
+set @locations = Concat("https://smiledirectclub",@com,"/locations/")
+set @faq = Concat("https://smiledirectclub",@com,"/faq/")
+set @ins = Concat("https://smiledirectclub",@com,"/insurance/get-started/")
+if @country == "Australia" then
+  set @ins = Concat("https://smiledirectclub",@com,"/insurance/")
+endif
+set @aligners = Concat("https://smiledirectclub",@com,"/checkout-aligner/")
+set @returns = Concat("https://smiledirectclub",@com,"/returns/")
+set @invite = Concat("https://smiledirectclub",@com,"/invite")
+set @privacy = Concat("https://smiledirectclub",@com,"/privacy")
+
+endif
+
+/* US and default variables */
+
+if Empty(@ambassadorAmount) then
+set @ambassadorAmount = "100"
+endif
+if Empty(@currency) then
+set @currency = "$"
+endif
+if Empty(@com) then
+set @com = ".com"
+endif
+if Empty(@ID) then
+set @ID = "US"
+endif
+if Empty(@insurance) then
+set @insurance = "insurance"
+endif
+if Empty(@yourIns) then
+set @yourIns = "insurance"
+endif
+if Empty(@alignerShipTime) then
+set @alignerShipTime = "3-4 weeks"
+endif
+if Empty(@singleDeal) then
+set @singleDeal = "1795"
+endif
+if Empty(@smileDeal) then
+set @smileDeal = "2190"
+endif
+if Empty(@showINS) then
+set @showINS = "yes"
+endif
+if Empty(@showCareCredit) then
+set @showCareCredit = "yes"
+endif
+if Empty(@hasAmbassadorProgram) then
+set @hasAmbassadorProgram = "yes"
+endif
+if Empty(@SmilePayMonths) then
+set @SmilePayMonths = "24"
+endif
+if Empty(@kitShipTime) then
+set @kitShipTime = "1-2 days"
+endif
+if Empty(@mccShipTime) then
+set @mccShipTime = "4-5 weeks"
+endif
+
+]%%
+

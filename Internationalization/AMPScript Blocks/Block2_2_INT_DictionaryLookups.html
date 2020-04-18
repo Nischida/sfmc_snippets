@@ -1,0 +1,36 @@
+%%[
+set @dictionaryDE = 'INT_Dictionary'
+
+/* International Dictionary Lookups */
+
+  /* @com sets the domain routing for global links */
+  set @comCheck = Lookup(@INT_Dictionary,@lang_region, "Phrase", "com")
+  if not empty(@comCheck) then 
+    set @Phrase = @comCheck
+  else
+  set @com = Lookup(@INT_Dictionary,"en-US","Phrase","com")
+  endif
+
+  set @ValueCheck = Lookup(@INT_Dictionary,@lang_region, "Phrase", "Phrase")
+  if not empty(@ValueCheck) then 
+    set @Phrase = @ValueCheck
+  else
+  set @Phrase = Lookup(@INT_Dictionary,"en-US","Phrase","Phrase")
+  endif
+  
+
+/*Social Links*/
+/*Facebook*/
+set @socialLink_FacebookCheck = Lookup(@INT_Dictionary,@lang_region, "Phrase", "socialLink_Facebook")
+if not empty(@socialLink_FacebookCheck) then 
+  set @socialLink_Facebook = @socialLink_FacebookCheck
+else
+ set @socialLink_Facebook = Lookup(@INT_Dictionary,"en-US","Phrase","socialLink_Facebook")
+endif
+
+
+/* define global links */
+set @path = Concat(@baseURL,@com,"urlPath")
+
+]%%
+
