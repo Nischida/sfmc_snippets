@@ -26,12 +26,12 @@ var streamName = 'TLI';
 
 
 //Content Builder Folder Names
-var rootFolderName = 'INT_Assets';
-var codeBlockSubFolderName = 'INT_CodeBlocks';
-var coreSubFolderName = 'Core Assets';
-var devSubFolderName = 'Dev Assets';
-var prodSubFolderName = 'Prod Assets';
-var optSubFolderName = 'Optional Assets';
+var rootFolderName = 'INT_Assets' + attempt;
+var codeBlockSubFolderName = 'INT_CodeBlocks' + attempt;
+var coreSubFolderName = 'Core Assets' + attempt;
+var devSubFolderName = 'Dev Assets' + attempt;
+var prodSubFolderName = 'Prod Assets' + attempt;
+var optSubFolderName = 'Optional Assets' + attempt;
 
 //Data Extension Asset Folder Names   
 var parentFolderName = 'INT_DataExtensions' + attempt;

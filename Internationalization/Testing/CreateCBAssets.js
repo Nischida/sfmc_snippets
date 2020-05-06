@@ -2,10 +2,11 @@
   Platform.Load("core", "1.1.1");
 
   try{
+var mod = '_func_testing_1';
+
 
 var streamName = 'TLI Test';
 
-var mod = '_func_testing_1';
 //Content Builder Folder Names
 var rootFolderName = 'INT_Assets' + mod;
 var coreSubFolderName = 'Core Assets' + mod;
@@ -61,10 +62,6 @@ var prefCenterDE = ''; //Fill in if there is an existing Preference Center or lo
 
 //Other Asset Names
 var emailName = 'TLI_TestEmail' + mod;
-
-//Data Extension Headers
-var contentHeaders = ["headline","subheadline","copy","cta","imgsrc","alttext"]
-var dictionaryHeaders = ["en-US","zh-HK"]
 
 
 
@@ -122,8 +119,33 @@ function createCBFolder(restBase, contentType, accessToken, categoryName, parent
 return result;
 };
 
+function getDEFolderID(name, parentID){
+//Get Stream Content Folder ID
+var folderProx = new Script.Util.WSProxy();
+var cols = ["Name","ID"];
+var filter = {
+    LeftOperand:{ 
+    Property: "Name",
+    SimpleOperator: "equals",
+    Value: name
+    },
+    LogicalOperator: "AND",
+    RightOperand: {
+    Property: "ParentFolder.ID",
+    SimpleOperator: "equals",
+    Value: parentID
+  }
+};
 
+
+
+var folderData = folderProx.retrieve("DataFolder", cols, filter);
+var folderID = folderData.Results[0].ID;
+
+return folderID;
+};
   
+
 function getFolderID(categoryName){
   //Get Root Folder ID
   var result = Folder.Retrieve({Property:"Name",SimpleOperator:"equals",Value:categoryName});
@@ -209,130 +231,6 @@ return result;
 };
 
 
-function createDEFolder(categoryName, parentID, description){
-	if(!getFolderID(categoryName)){
-	var deGUID = Platform.Function.GUID();
-
-	var newFolder = {
-	    "Name" : categoryName,
-	    "CustomerKey" : deGUID,
-	    "Description" : description,
-	    "ContentType" : "DataExtension",
-	    "IsActive" : "true",
-	    "IsEditable" : "true",
-	    "AllowChildren" : "true",
-	    "ParentFolderID" : parentID
-	};
-
-	var result = Folder.Add(newFolder);
-
-	} else {
-
-  	var result = categoryName + ' already Exists';
-
-  };
-
-return result;
-};
-
-
-function getDECustomerKey(name){
-var prox = new Script.Util.WSProxy();
-var cols = ["CustomerKey"];
-var filter = {
-    Property: "Name",
-    SimpleOperator: "equals",
-    Value: name
-};  
-  
-var result = prox.retrieve("DataExtension", cols, filter);
-var customerKey = result.Results[0].CustomerKey  
-
-return customerKey;
-};
-  
-  
-    
-function createDE(name, init, description, categoryName){
-  if(!getDECustomerKey(name)){
-    var categoryID = getFolderID(categoryName);
-
-    var prox = new Script.Util.WSProxy();  
-    var deGUID = Platform.Function.GUID();
-
-    var deFields = {
-        Name: name,
-        CustomerKey: deGUID,
-        Description: description,
-        CategoryID: categoryID,
-        Fields: init.fields
-    };
-
-    var result = prox.createItem("DataExtension", deFields);
-  };
-};
-
-
-function updateDEFields(update, name){
-  var customerKey = getDECustomerKey(name);
-    
-  var fieldType = update.fieldType;
-  var isprimarykey = update.isPrimaryKey;
-  var isNillable = update.isNillable;
-  var isRequired = update.isRequired;
-  var fields = update.fields;
-  
-    for(p = 1; p < update.iterations; p++){
-      for(u = 0; u < fields.length; u++){
-          var prox = new Script.Util.WSProxy();
-      		
-          var fieldName = fields[u] + "_" + p;
-
-          var deField = [
-              {FieldType: fieldType, Name: fieldName, IsPrimaryKey: isprimarykey, IsNillable: isNillable, IsRequired: isRequired}
-          ];
-
-        
-         var props = { 
-              CustomerKey: customerKey,
-              Fields: deField 
-          };
-
-          var result = prox.updateItem("DataExtension", props);
-       };
-    };
-  };
- 
- function upsertDEContent(update, name){
-  var customerKey = getDECustomerKey(name);
-    
-  var fieldType = update.fieldType;
-  var isprimarykey = update.isPrimaryKey;
-  var isNillable = update.isNillable;
-  var isRequired = update.isRequired;
-  var fields = update.fields;
-  
-    for(p = 1; p < update.iterations; p++){
-      for(u = 0; u < fields.length; u++){
-          var prox = new Script.Util.WSProxy();
-      		
-          var fieldName = fields[u] + "_" + p;
-
-          var deField = [
-              {FieldType: fieldType, Name: fieldName, IsPrimaryKey: isprimarykey, IsNillable: isNillable, IsRequired: isRequired}
-          ];
-
-        
-         var props = { 
-              CustomerKey: customerKey,
-              Fields: deField 
-          };
-
-          var result = prox.updateItem("DataExtension", props);
-       };
-    };
-  };
-
 
 
 
@@ -341,268 +239,6 @@ var accessToken = auth(clientID, clientSecret, contentType, grantType, authBase)
 
   
 Write('Token: ' + accessToken + '<br>');
-
-
-var contentHeaders = [];
-var dictionaryHeaders = [];
-
-
-var deFolders = [
-	{
-		"name": rootFolderName,
-		"description": "All data extensions assets.",
-		"subfolder": 
-		[
-			{
-				"name": logsFolderName,
-				"description": "All logging data extensions."
-			},
-			{
-				"name": supportingFolderName,
-				"description": "All supporting data extensions.",
-				"subfolder": 
-				[
-					{
-						"name": dictionaryFolderName,
-						"description": "All dictionary data extensions."
-					},
-					{
-						"name": catalogFolderName,
-						"description": "All catalog data extensions."
-						
-					},
-					{
-						"name": limitingFolderName,
-						"description": "All send limiting data extensions."
-					}
-				]	
-			},
-			{
-				"name": contentFolderName,
-				"description": "All Content Data Extensions for all emails.",
-				"subfolder": 
-				[
-					{
-						"name": contentSubFolderName,
-						"description": "Content folder.",
-						"subfolder": 
-						[
-							{
-								"name":	contentPRODFolderName,
-								"description": "Content folder for production content."
-							},
-							{
-								"name":	contentSTGFolderName,
-								"description": "Content folder for staging content."
-							}
-
-						]
-					},
-					{
-						"name": rcContentFolderName,
-						"description": "Content folder for reusable content.",
-						"subfolder": 
-						[
-							{
-								"name":	rcContentPRODFolderName,
-								"description": "Content folder for reusable content."
-							},
-							{
-								"name":	rcContentSTGFolderName,
-								"description": "Content folder for reusable content."
-							}
-
-						]
-					}
-				]
-			},
-			
-			
-		]
-	}
-
-];
-    
-
-var deAssets = 
-[
-	{
-		"name": dictionaryDE,
-		"categoryName": dictionaryFolderName,
-		"description": "Translated phrases and other assets.",
-		"assets":[
-		{
-			"init": {
-				"fields": 
-				[
-			      {FieldType: "Text", Name: "Phrase", MaxLength: 250, IsPrimaryKey: true, IsNillable: false, IsRequired: true}
-				]
-
-			},
-			"update": 
-			{	
-              	"fields": dictionaryHeaders,
-				"fieldType": "Text",
-				"isPrimaryKey": false,
-				"isNillable": true,
-				"isRequired": false,
-				"iterations": 1
-			}
-              
-		}
-		]
-	},
-	{
-		"name": catalogDE,
-		"categoryName": catalogFolderName,
-		"description": "Catalog of all emails and data extension locations.",
-      	"assets":
-      	[
-			{
-            "init": {
-                "fields": [
-                    {FieldType: "Text",Name: "emailname",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
-                    {FieldType: "Text",Name: "lang_region",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
-                    {FieldType: "Text",Name: "prodDE",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
-                    {FieldType: "Text",Name: "stgDE",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
-                    ]
-                }
-            }
-    	]
-	},
-	{
-		"name": contentBlockCatalogDE,
-		"categoryName": catalogFolderName,
-		"description": "All assets and asset IDs.",
-		"assets": 
-  		[
-            {
-            	"init":{
-                        "fields": [
-                            {FieldType: "Text",Name: "AssetName",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
-                            {FieldType: "Text",Name: "ID",MaxLength: 100,IsNillable: false,IsRequired: true}
-                        ]
-                }
-            }
-        ]
-	},
-	{	
-		"name": contentPRODRomDE,
-		"categoryName": contentPRODFolderName,
-		"description": "Production Content",
-		"assets":[
-            {
-                "init": {
-                    "fields": [
-	                    {FieldType: "Text",Name: "emailname",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
-	                    {FieldType: "Text",Name: "lang_region",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
-	                    {FieldType: "Text",Name: "subject",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
-	                    {FieldType: "Text",Name: "preheader",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
-                    ]
-                }
-			},
-			{
-				"update": 
-				{
-					"fields": contentHeaders,
-					"fieldType": "Text",
-					"isPrimaryKey": false,
-					"isNillable": true,
-					"isRequired": false,
-					"iterations": iterations + 1
-				}
-			}
-		]
-	},
-	{	
-		"name": contentPRODSymDE,
-		"categoryName": contentPRODFolderName,
-		"description": "Production Content",
-		"assets": [
-            {
-                "init": {
-                    "fields": [
-                          {FieldType: "Text",Name: "emailname",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
-                          {FieldType: "Text",Name: "lang_region",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
-                          {FieldType: "Text",Name: "subject",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
-                          {FieldType: "Text",Name: "preheader",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
-                        ]
-                    }
-			},
-			{
-				"update": 
-					{
-						"fields": contentHeaders,
-						"fieldType": "Text",
-						"isPrimaryKey": false,
-						"isNillable": true,
-						"isRequired": false,
-						"iterations": iterations + 1
-					}
-			}
-		]
-	},
-	{	
-		"name": contentSTGRomDE,
-		"categoryName": contentSTGFolderName,
-		"description": "Staging Content",
-		"assets":[
-            {
-              "init": 
-                  {
-                      "fields": 
-                      [
-                        {FieldType: "Text",Name: "emailname",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
-                        {FieldType: "Text",Name: "lang_region",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
-                        {FieldType: "Text",Name: "subject",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
-                        {FieldType: "Text",Name: "preheader",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
-                      ]
-                  }
-
-			},
-			{
-				"update": 
-				{
-					"fields": contentHeaders,
-					"fieldType": "Text",
-					"isPrimaryKey": false,
-					"isNillable": true,
-					"isRequired": false,
-					"iterations": iterations + 1
-				}
-			}
-
-		]
-	},
-	{	
-		"name": contentSTGSymDE,
-		"categoryName": contentSTGFolderName,
-		"description": "Staging Content",
-		"assets": [
-            {
-                "init": {
-                   "fields": [
-                        {FieldType: "Text",Name: "emailname",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
-                        {FieldType: "Text",Name: "lang_region",MaxLength: 250,IsPrimaryKey: true,IsNillable: false,IsRequired: true},
-                        {FieldType: "Text",Name: "subject",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false},
-                        {FieldType: "Text",Name: "preheader",MaxLength: 250,IsPrimaryKey: false,IsNillable: true,IsRequired: false}
-                    ]
-                }
-            },
-            {
-	            "update": {
-	                "fields": contentHeaders,
-	                "fieldType": "Text",
-	                "isPrimaryKey": false,
-	                "isNillable": true,
-	                "isRequired": false,
-	                "iterations": iterations + 1
-                }
-            }
-        ]
-    }
-];
-
 
 
 var cbAssets = [  
@@ -697,136 +333,9 @@ var cbAssets = [
 ];
 
 
-var categoryName = 'Data Extensions';
-var parentID = getFolderID(categoryName);
-
-//Creat Data Extension Assets
-for(i = 0; i < deFolders.length; i++){
-	Write("Parent: " + i + "<br>");
-	Write("parentID: " + parentID + "<br>");
-	Write(deFolders[i].name + "<br>");
-	Write(deFolders[i].description + "<br>");
-	Write("<hr>");
-
-	var categoryName = deFolders[i].name;
-	var description = deFolders[i].description;
-	
-	// Creates Parent Folder // INT_DataExtensions
-	createDEFolder(categoryName, parentID, description);
-
-  	// pushes ID to [0] 
-  	deFolders[i].id = getFolderID(categoryName);
-
-  	// sets parentID for subfolder; T1
-	var parentID = deFolders[i].id;
-
-		for(s = 0; s < deFolders[i].subfolder.length; s++){
-			if(deFolders[i].subfolder[s].name){
-			    Write("Subfolders 1: " + s + "<br>");
-			    Write("parentID: " + parentID + "<br>");
-			  	Write(deFolders[i].subfolder[s].name + "<br>");
-			  	Write(deFolders[i].subfolder[s].description + "<br>");
-			    Write("<hr>");
-			    
-		    	var categoryName = deFolders[i].subfolder[s].name;
-				var description =	deFolders[i].subfolder[s].description;
-
-				//Creates T1 Subfolders // Logs, Supporting and Content Data Extensions
-				createDEFolder(categoryName, parentID, description);
-			  	
-			    // pushes folder IDs to each folder id
-			  	deFolders[i].subfolder[s].id = getFolderID(categoryName);
-			};
-		   
-
-				for(s2 = 0; s2 < deFolders[i].subfolder[s].subfolder.length; s2++){
-					if(deFolders[i].subfolder[s].subfolder[s2].name){
-						Write("Subfolders 2: " + s2 + "<br>");
-						Write("parentID: " + parentID + "<br>");
-						Write(deFolders[i].subfolder[s].subfolder[s2].name + "<br>");
-						Write(deFolders[i].subfolder[s].subfolder[s2].description + "<br>");
-						Write("<hr>");
-                      
-						var parentID = deFolders[i].subfolder[s].id;
-						var categoryName = deFolders[i].subfolder[s].subfolder[s2].name;
-						var description =	deFolders[i].subfolder[s].subfolder[s2].description;
-
-						createDEFolder(categoryName, parentID, description);
-					  	
-					  	deFolders[i].subfolder[s].subfolder[s2].id = getFolderID(categoryName);
-
-						
-					};
-                  
-                      for(s3 = 0; s3 < deFolders[i].subfolder[s].subfolder[s2].subfolder.length; s3++){
-                        if(deFolders[i].subfolder[s].subfolder[s2].subfolder[s3].name){
-                            Write("Subfolders 3: " + s3 + "<br>");
-                            Write("parentID: " + parentID + "<br>");
-                            Write(deFolders[i].subfolder[s].subfolder[s2].subfolder[s3].name + "<br>");
-                            Write(deFolders[i].subfolder[s].subfolder[s2].subfolder[s3].description + "<br>");
-                            Write("<hr>");
-                          
-							var parentID = deFolders[i].subfolder[s].subfolder[s2].id;
-                            var categoryName = deFolders[i].subfolder[s].subfolder[s2].subfolder[s3].name;
-                            var description =	deFolders[i].subfolder[s].subfolder[s2].subfolder[s3].description;
-
-                            createDEFolder(categoryName, parentID, description);
-
-                            deFolders[i].subfolder[s].subfolder[s2].subfolder[s3].id = getFolderID(categoryName);
-
-                        };
-                    };
-			    };
-		    	
-		};
-  
-};
-    
-
-//Create Data Extensions
-  for(i = 0; i < deAssets.length; i++){
-    Write(deAssets[i].name + "<br>");
-    Write(deAssets[i].categoryName + "<br>");
-    Write(deAssets[i].description + "<br>");
-    Write(Stringify(deAssets[i].assets[0].init) + "<br>");
-   	Write(Stringify(deAssets[i].assets[0].update) + "<br>");
-	
-    var name = deAssets[i].name;
-    var categoryName = deAssets[i].categoryName;
-    var description = deAssets[i].description;
-    var init = deAssets[i].assets[0].init;
-    var update = deAssets[i].assets[1].update;
-    
-    
-    if(update){
-    
-    }
-   	
-    
-   createDE(name, init, description, categoryName);
-    
-	//var CustomerKey = getDECustomerKey(name);
-    //Write(CustomerKey);
-   
-    if(update){
-      Write("Iterations " + update.iterations);
-      Write(update.fieldType);
-      Write(update.isPrimaryKey);
-      Write(update.isNillable);
-      Write(update.isRequired + "<br><br>");
-      
-      updateDEFields(update, name);
-    };
-   
-    
-  };
-
-
-
 
 //Create Content Builder Assets
-
-    
+ 
 //Get Content Builder Folder ID
 var categoryName = 'Content Builder';
 var parentID = getFolderID(categoryName);
